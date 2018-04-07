@@ -1,0 +1,41 @@
+version: "3"
+services:
+  web:
+    image: nginx:latest
+    container_name: web
+    depends_on:
+      - todolist
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - $HOME/etc/nginx/conf.d:/etc/nginx/conf.d
+      - $HOME/opt:/etc/ssl/certs
+    links:
+      - todolist
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1000k"
+        max-file: "20"
+    networks:
+      - mysql_app
+
+  todolist:
+    image: todolist:latest
+    container_name: todolist
+    ports:
+      - "8080:8080"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1000k"
+        max-file: "20" 
+    external_links:
+      - dbmaster
+      - dbslave
+    networks:
+      - mysql_app
+networks:
+  mysql_app:
+    external: true
