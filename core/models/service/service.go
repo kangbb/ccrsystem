@@ -6,6 +6,14 @@ import (
 	"github.com/kangbb/class-reservation/core/models/entities"
 )
 
+type InfoService interface {
+	SaveAInfo(Info interface{}) (bool, error)
+	FindInfoById(id int) interface{}
+	FindAllInfo() interface{}
+	UpdateInfo(id int, arg ...interface{}) (bool, error)
+	DeleteInfo(id int, arg ...interface{}) (bool, error)
+}
+
 //Create a new student
 func NewStudent(id int, pwd string, name string, perm bool) entities.StudentInfo {
 	student := entities.StudentInfo{
