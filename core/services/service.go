@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+//User login
+func Login(UserType string) {
+
+}
+
 /***********************************SOME SUBFUNCTION*******************************/
 func lessonToTime(lessonTime string) time.Time {
 	mappingRegular := map[string]int{
