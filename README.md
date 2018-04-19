@@ -40,6 +40,10 @@ http://www.example.com/api/departments/{id}                  //获取(GET)、修
 |获取数据|POST|path|表格提交，例外
 |删除数据|DELETE|body|
 
+## api文档
+
+网址：[https://classroomreservation.docs.apiary.io/#](https://classroomreservation.docs.apiary.io/#)
+
 ## 前端文件约定
 ```bash
 //文件名称
