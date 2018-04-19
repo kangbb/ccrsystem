@@ -40,7 +40,22 @@ http://www.example.com/api/departments/{id}                  //获取(GET)、修
 |获取数据|POST|path|表格提交，例外
 |删除数据|DELETE|body|
 
+## 前端文件约定
+```bash
+//文件名称
+index.html   # 主页文件(网站主页，包含登录功能)
+StudentIndex.html # 学生主页
+ApproverIndex.html # 审批人员主页
+AdminIndex.html # 管理员主页
+
+//静态文件路径,eg:
+/static/js/main.js
+/static/css/main.css
+/statis/img/logo.png
+```
+
 ## 数据结构约定
+更加详细的部分请参考api文档。
 ```go
 // StudentInfo store student information
 type StudentInfo struct {
