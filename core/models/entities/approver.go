@@ -5,6 +5,7 @@ type ApproverInfo struct {
 	ApproverId   int `xorm:"pk 'id'"`
 	ApproverPwd  string
 	ApproverName string
+	DepartmentId int
 	Permission   bool
 }
 
