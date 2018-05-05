@@ -6,18 +6,56 @@ HOST: http://private-82de94-classroomreservation.apiary-mock.com/
 A simple classroom reservation system. You can query idle classroom, reservation classroom, and approve 
 reservations on it.
 
+## Function Interface
+
+### Student sigin [POST /student/signin]
+If success, it will redirect to the student home page.<br />
+Else, it will redirect to the Home page.
++ Request (application/json)
+
+        {
+            "StudentId": 15331124,
+            "StudentPwd": "123456"
+        }
+
++ Response 200 (application/json)
+
+### Admin sigin [POST /admin/signin]
+If success, it will redirect to the admin home page.<br />
+Else, it will redirect to the Home page.
++ Request (application/json)
+
+        {
+            "AdminId": 11331125,
+            "AdminPwd": "123456",
+        }
+
++ Response 200 (application/json)
+
+### Approver sigin [POST /approver/signin]
+If success, it will redirect to the approver home page.<br />
+Else, it will redirect to the Home page.
++ Request (application/json)
+
+        {
+            "ApproverId": 10331124,
+            "ApproverPwd":"123456"
+        }
+
++ Response 200 (application/json)
+
 ##  Student Data Interface
 
 ### Get student information [GET /api/users/student]
 Don't need anything in request, identify the users by session.<br/>
 @Permission: Student
 + Response 200 (application/json)
-
+    
         {
-            StudentId: 15331124,
-            StudentPwd: "",
-            StudentName: "王芳",
-            Permission: true
+            "StudentId": 15331124,
+            "StudentPwd": "",
+            "StudentName": "王芳",
+            "Permission": true
         }
 
 ###  Modify student information [POST /api/users/student]
@@ -26,8 +64,8 @@ Modify the student account information, just for password.<br/>
 + Request (application/json)
 
         {
-            id: 15331124,
-            StudentPwd:"student123"
+            "id": 15331124,
+            "StudentPwd": "student123"
         }
 
 + Response 200 (application/json)
@@ -40,22 +78,22 @@ Get student information list.<br/>
 
         [
             {
-                StudentId: 15331124,
-                StudentPwd: "",
-                StudentName: "王芳",
-                Permission: true
+                "StudentId": 15331124,
+                "StudentPwd": "",
+                "StudentName": "王芳",
+                "Permission": true
             },
             {
-                StudentId: 15331125,
-                StudentPwd: "",
-                StudentName: "赵红",
-                Permission: true
+                "StudentId": 15331125,
+                "StudentPwd": "",
+                "StudentName": "赵红",
+                "Permission": true
             },
             {
-                StudentId: 16331124,
-                StudentPwd: "",
-                StudentName: "王芸",
-                Permission: true
+                "StudentId": 16331124,
+                "StudentPwd": "",
+                "StudentName": "王芸",
+                "Permission": true
             }
         ]
 
@@ -66,10 +104,10 @@ Add a student account to the database.<br/>
 + Request (application/json)
 
         {
-            StudentId: 15331125,
-            StudentPwd: "student123",
-            StudentName: "赵红",
-            Permission: true
+            "StudentId": 15331125,
+            "StudentPwd": "student123",
+            "StudentName": "赵红",
+            "Permission": true
         }
 
 + Response 200 (application/json)
@@ -86,10 +124,10 @@ Get a student information by id, need admin permission.<br />
 + Response 200 (application/json)
 
         {
-            StudentId: 15331124,
-            StudentPwd: "",
-            StudentName: "王芳",
-            Permission: true
+            "StudentId": 15331124,
+            "StudentPwd": "",
+            "StudentName": "王芳",
+            "Permission": true
         }
 
 ### Modify student information by id [PUT /api/users/students/{id}]
@@ -99,8 +137,8 @@ If sucess, response 200; if failed, response 500.<br/>
 +  Request (application/json)
 
         {
-            StudentId: 15331124,
-            StudentPwd:"student123"
+            "StudentId": 15331124,
+            "StudentPwd":"student123"
         }
 
 + Response 200 (application/json)    
@@ -113,7 +151,7 @@ If sucess, response 200; if failed, response 500.<br/>
 + Request (application/json)
 
         {
-            StudentId: 15331124
+            "StudentId": 15331124
         }
 
 + Response 200 (application/json)
@@ -127,11 +165,11 @@ Don't need anything in request, identify the users by session.<br/>
 + Response 200 (application/json)
 
         {
-            ApproverId: 10331124,
-            ApproverPwd: "",
-            ApproverName: "李怡",
-            DepartmentId: 123,
-            Permission: true
+            "ApproverId": 10331124,
+            "ApproverPwd": "",
+            "ApproverName": "李怡",
+            "DepartmentId": 123,
+            "Permission": true
         }
 
 ###  Modify approver information [POST /api/users/approver]
@@ -141,8 +179,8 @@ Modify the approver account information, just for password.<br/>
 + Request (application/json)
 
         {
-            ApproverId: 10331124,
-            ApproverPwd:"approver123"
+            "ApproverId": 10331124,
+            "ApproverPwd":"approver123"
         }
 
 + Response 200 (application/json)
@@ -155,25 +193,25 @@ Get approver information list.<br/>
 
         [
             {
-                ApproverId: 10331124,
-                ApproverPwd: "",
-                ApproverName: "李怡",
-                DepartmentId: 123,
-                Permission: true
+                "ApproverId": 10331124,
+                "ApproverPwd": "",
+                "ApproverName": "李怡",
+                "DepartmentId": 123,
+                "Permission": true
             },
             {
-                ApproverId: 10331125,
-                ApproverPwd: "",
-                ApproverName: "宋晓",
-                DepartmentId: 124,
-                Permission: true
+                "ApproverId": 10331125,
+                "ApproverPwd": "",
+                "ApproverName": "宋晓",
+                "DepartmentId": 124,
+                "Permission": true
             },
             {
-                ApproverId: 10031124,
-                ApproverPwd: "",
-                ApproverName: "李芸",
-                DepartmentId: 125,
-                Permission: true
+                "ApproverId": 10031124,
+                "ApproverPwd": "",
+                "ApproverName": "李芸",
+                "DepartmentId": 125,
+                "Permission": true
             }
         ]
 
@@ -184,11 +222,11 @@ Add a approver account to the database.<br/>
 + Request (application/json)
 
         {
-            ApproverId: 10331125,
-            ApproverPwd: "",
-            ApproverName: "宋晓",
-            DepartmentId: 124,
-            Permission: true
+            "ApproverId": 10331125,
+            "ApproverPwd": "",
+            "ApproverName": "宋晓",
+            "DepartmentId": 124,
+            "Permission": true
         }
         
 + Response 200 (application/json)
@@ -200,17 +238,17 @@ Get a approver information by id, need admin permission.<br/>
 + Request (application/json)
 
         {
-            ApproverId: 10331124
+            "ApproverId": 10331124
         }
 
 + Response 200 (application/json)
 
         {
-            ApproverId: 10331124,
-            ApproverPwd: "",
-            ApproverName: "李怡",
-            DepartmentId: 123,
-            Permission: true
+            "ApproverId": 10331124,
+            "ApproverPwd": "",
+            "ApproverName": "李怡",
+            "DepartmentId": 123,
+            "Permission": true
         }
 
 ### Modify approver information by id [PUT /api/users/approvers/{id}]
@@ -221,8 +259,8 @@ If sucess, response 200; if failed, response 500.<br/>
 +  Request (application/json)
 
         {
-            ApproverId: 10331124,
-            ApproverPwd:"approver123"
+            "ApproverId": 10331124,
+            "ApproverPwd":"approver123"
         }
 
 + Response 200 (application/json)    
@@ -235,7 +273,7 @@ If sucess, response 200; if failed, response 500.<br/>
 + Request (application/json)
 
         {
-            ApproverId: 10331124
+            "ApproverId": 10331124
         }
 
 + Response 200 (application/json)
@@ -248,10 +286,10 @@ Don't need anything in request, identify the users by session.<br/>
 + Response 200 (application/json)
 
         {
-            AdminId: 11331125,
-            AdminPwd: "",
-            AdminName: "李阳",
-            Permission: true
+            "AdminId": 11331125,
+            "AdminPwd": "",
+            "AdminName": "李阳",
+            "Permission": true
         }
 
 ###  Modify admin information [POST /api/users/admin]
@@ -260,8 +298,8 @@ Modify the admin account information, just for password.Only for the admin himse
 + Request (application/json)
 
         {
-            AdminId: 11331125,
-            AdminPwd:"admin123"
+            "AdminId": 11331125,
+            "AdminPwd":"admin123"
         }
 
 + Response 200 (application/json)
@@ -274,22 +312,22 @@ Get admin information list.<br/>
 
         [
             {
-                AdminId: 11331124,
-                AdminPwd: "",
-                AdminName: "赵毅",
-                Permission: true
+                "AdminId": 11331124,
+                "AdminPwd": "",
+                "AdminName": "赵毅",
+                "Permission": true
             },
             {
-                AdminId: 11331125,
-                AdminPwd: "",
-                AdminName: "李阳",
-                Permission: true
+                "AdminId": 11331125,
+                "AdminPwd": "",
+                "AdminName": "李阳",
+                "Permission": true
             },
             {
-                AdminId: 11031124,
-                AdminPwd: "",
-                AdminName: "万余里",
-                Permission: true
+                "AdminId": 11031124,
+                "AdminPwd": "",
+                "AdminName": "万余里",
+                "Permission": true
             }
         ]
 
@@ -300,10 +338,10 @@ Add a approver account to the database.<br/>
 + Request (application/json)
 
         {
-            AdminId: 11331124,
-            AdminPwd: "",
-            AdminName: "赵毅",
-            Permission: true
+            "AdminId": 11331124,
+            "AdminPwd": "",
+            "AdminName": "赵毅",
+            "Permission": true
         }
 + Response 200 (application/json)
 
@@ -313,16 +351,16 @@ Get a admin information by id, need admin permission.<br/>
 + Request (application/json)
 
         {
-            AdminId: "15331124"
+            "AdminId": "15331124"
         }
 
 + Response 200 (application/json)
 
         {
-            AdminId: 11331125,
-            AdminPwd: "",
-            AdminName: "李阳",
-            Permission: true
+            "AdminId": 11331125,
+            "AdminPwd": "",
+            "AdminName": "李阳",
+            "Permission": true
         }
 
 ### Modify admin information by id [PUT /api/users/admins/{id}]
@@ -332,8 +370,8 @@ If sucess, response 200; if failed, response 500.<br/>
 +  Request (application/json)
 
         {
-            AdminId: 11331125,
-            AdminPwd:"admin123"
+            "AdminId": 11331125,
+            "AdminPwd":"admin123"
         }
 
 + Response 200 (application/json)    
@@ -346,7 +384,7 @@ If sucess, response 200; if failed, response 500.<br/>
 + Request (application/json)
 
         {
-            AdminId: 11331125
+            "AdminId": 11331125
         }
 
 + Response 200 (application/json)
@@ -361,18 +399,18 @@ Get classroom information list.
 
         [
             {
-                ClassroomId: 1,
-                ClassroomCampus: "东校园",
-                ClassroomBuilding: "公教楼",
-                ClassroomNum: "A204",
-                Capicity: 180
+                "ClassroomId": 1,
+                "ClassroomCampus": "东校园",
+                "ClassroomBuilding": "公教楼",
+                "ClassroomNum": "A204",
+                "Capicity": 180
             },
             {
-                ClassroomId: 2,
-                ClassroomCampus: "南校园",
-                ClassroomBuilding: "第一教学楼",
-                ClassroomNum: "A104",
-                Capicity: 100
+                "ClassroomId": 2,
+                "ClassroomCampus": "南校园",
+                "ClassroomBuilding": "第一教学楼",
+                "ClassroomNum": "A104",
+                "Capicity": 100
             }
         ]
 
@@ -383,10 +421,10 @@ Add a classroom information to database.
 + Request (application/json)
 
         {
-            ClassroomCampus: "东校园",
-            ClassroomBuilding: "公教楼",
-            ClassroomNum: "A204",
-            Capicity: 180
+            "ClassroomCampus": "东校园",
+            "ClassroomBuilding": "公教楼",
+            "ClassroomNum": "A204",
+            "Capicity": 180
         }
 
 + Response 200 (application/json)
@@ -398,17 +436,17 @@ Get a classroom information by id.
 + Request (application/json)
 
         {
-            ClassroomId: 1
+            "ClassroomId": 1
         }
 
 + Response 200 (application/json)
 
         {
-            ClassroomId: 1,
-            ClassroomCampus: "东校园",
-            ClassroomBuilding: "公教楼",
-            ClassroomNum: "A204",
-            Capicity: 180
+            "ClassroomId": 1,
+            "ClassroomCampus": "东校园",
+            "ClassroomBuilding": "公教楼",
+            "ClassroomNum": "A204",
+            "Capicity": 180
         }
 
 ### Modify a classroom information by id [PUT /api/classrooms/{id}]
@@ -418,11 +456,11 @@ Must include all of the property of the classroom, although some need not to upd
 + Request (application/json)
 
         {
-            ClassroomId: 1,
-            ClassroomCampus: "东校园",
-            ClassroomBuilding: "公教楼",
-            ClassroomNum: "A204",
-            Capicity: 150
+            "ClassroomId": 1,
+            "ClassroomCampus": "东校园",
+            "ClassroomBuilding": "公教楼",
+            "ClassroomNum": "A204",
+            "Capicity": 150
         }
 
 + Response 200 (application/json)
@@ -433,7 +471,7 @@ Must include all of the property of the classroom, although some need not to upd
 + Request (application/json)
 
         {
-            ClassroomId: 1
+            "ClassroomId": 1
         }
 
 + Response 200 (application/json)
@@ -446,28 +484,28 @@ Return the classrooms which are occupied during the query time and the classroom
 + Request (application/json)
 
         {
-            ClassroomCampus: "东校园",
-            ClassroomBuilding: "公教楼",
-            Capicity: 60，
-            StartTime: "2018-05-23 第一节课",
-            EndTime: "2018-05-23 第八节课"
+            "ClassroomCampus": "东校园",
+            "ClassroomBuilding": "公教楼",
+            "Capicity": 60，
+            "StartTime": "2018-05-23 第一节课",
+            "EndTime": "2018-05-23 第八节课"
         }
 
 + Response 200 (application/json)
 
         [
             {
-                ClassroomId: 1,
-                ClassroomCampus: "东校园",
-                ClassroomBuilding: "公教楼",
-                Capicity: 180,
-                Res: [
+                "ClassroomId": 1,
+                "ClassroomCampus": "东校园",
+                "ClassroomBuilding": "公教楼",
+                "Capicity": 180,
+                "Res": [
                     {
-                        ResId: 23,
-                        StartTime: "2018-05-23 第三节课",
-                        EndTime: "2018-05-23 第五节课",
-                        ResState: "预定成功",
-                        ResReason: "计算机网络与组成"
+                        "ResId": 23,
+                        "StartTime": "2018-05-23 第三节课",
+                        "EndTime": "2018-05-23 第五节课",
+                        "ResState": "预定成功",
+                        "ResReason": "计算机网络与组成"
                     }
                 ]
             }
@@ -480,22 +518,22 @@ Return the classrooms which are occupied during the query time and the classroom
 + Request (application/json)
 
         {
-            ResId: 1
+            "ResId": 1
         }
 
 + Response 200 (application/json)
 
         {
-            ResId: 1,
-            ResState: "审批中",
-            StartTime: "2018-05-23 第三节课",
-            EndTime: "2018-05-23 第五节课",
-            ResReason: "社团面试",
-            ApprovalNote: "批准",
-            DepartmentId: 15,
-            StudentId: 15331124,
-            ApproverId: 10331124,
-            ClassroomId: 1
+            "ResId": 1,
+            "ResState": "审批中",
+            "StartTime": "2018-05-23 第三节课",
+            "EndTime": "2018-05-23 第五节课",
+            "ResReason": "社团面试",
+            "ApprovalNote": "批准",
+            "DepartmentId": 15,
+            "StudentId": 15331124,
+            "ApproverId": 10331124,
+            "ClassroomId": 1
         }
 
 ### Modify a reservation information by id [PUT /api/reservation/{id}]
@@ -506,11 +544,11 @@ eg: for approver
 + Request (application/json)
         
         {
-            ResId: 1,
-            ResState: "审批未通过",
-            DepartmentId: 123,
-            ApproverId: 10331124,
-            ApproveNote: "场地不允许"
+            "ResId": 1,
+            "ResState": "审批未通过",
+            "DepartmentId": 123,
+            "ApproverId": 10331124,
+            "ApproveNote": "场地不允许"
         }
 + Response 200 (application/json)
 
@@ -518,11 +556,11 @@ eg: for approver
 + Request (application/json)
         
         {
-            ResId: 1,
-            ResState: "等待下一个部门审批",
-            DepartmentId: 123,
-            ApproverId: 10331124,
-            ApproveNote: "批准"
+            "ResId": 1,
+            "ResState": "等待下一个部门审批",
+            "DepartmentId": 123,
+            "ApproverId": 10331124,
+            "ApproveNote": "批准"
         }
 + Response 200 (application/json)
 ```
@@ -531,8 +569,8 @@ eg: for approver
 + Request (application/json)
 
         {
-            ResId: 1,
-            ResReason: "社团破冰"
+            "ResId": 1,
+            "ResReason": "社团破冰"
         }
 
 + Response 200 (application/json)
@@ -543,7 +581,7 @@ eg: for approver
 + Request (application/json)
 
         {
-            ResId: 1
+            "ResId": 1
         }
 
 + Response 200 (application/json)
@@ -555,28 +593,28 @@ eg: for approver
 
         [
                 {
-                    ResId: 1,
-                    ResState: "审批中",
-                    StartTime: "2018-05-23 第三节课",
-                    EndTime: "2018-05-23 第五节课",
-                    ResReason: "社团面试",
-                    ApprovalNote: "批准",
-                    DepartmentId: 15,
-                    StudentId: 15331124,
-                    ApproverId: 10331124,
-                    ClassroomId: 1
+                    "ResId": 1,
+                    "ResState": "审批中",
+                    "StartTime": "2018-05-23 第三节课",
+                    "EndTime": "2018-05-23 第五节课",
+                    "ResReason": "社团面试",
+                    "ApprovalNote": "批准",
+                    "DepartmentId": 15,
+                    "StudentId": 15331124,
+                    "ApproverId": 10331124,
+                    "ClassroomId": 1
                 },
                 {
-                    ResId: 2,
-                    ResState: "预定失败",
-                    StartTime: "2018-05-24 第八节课",
-                    EndTime: "2018-05-24 第十节课",
-                    ResReason: "生日party",
-                    ApprovalNote: "不允许的活动",
-                    DepartmentId: 15,
-                    StudentId: 15331124,
-                    ApproverId: 10331124,
-                    ClassroomId: 3
+                    "ResId": 2,
+                    "ResState": "预定失败",
+                    "StartTime": "2018-05-24 第八节课",
+                    "EndTime": "2018-05-24 第十节课",
+                    "ResReason": "生日party",
+                    "ApprovalNote": "不允许的活动",
+                    "DepartmentId": 15,
+                    "StudentId": 15331124,
+                    "ApproverId": 10331124,
+                    "ClassroomId": 3
                 }
         ]
 
@@ -587,16 +625,16 @@ eg: for approver
 
         [
                 {
-                    ResId: 1,
-                    ResState: "审批中",
-                    StartTime: "2018-05-23 第三节课",
-                    EndTime: "2018-05-23 第五节课",
-                    ResReason: "社团面试",
-                    ApprovalNote: "批准",
-                    DepartmentId: 15,
-                    StudentId: 15331124,
-                    ApproverId: 10331124,
-                    ClassroomId: 1
+                    "ResId": 1,
+                    "ResState": "审批中",
+                    "StartTime": "2018-05-23 第三节课",
+                    "EndTime": "2018-05-23 第五节课",
+                    "ResReason": "社团面试",
+                    "ApprovalNote": "批准",
+                    "DepartmentId": 15,
+                    "StudentId": 15331124,
+                    "ApproverId": 10331124,
+                    "ClassroomId": 1
                 }
         ]
 
@@ -606,10 +644,10 @@ eg: for approver
 + Request (application/json)
 
         {
-                StartTime: "2018-05-25 第十三节课",
-                EndTime: "2018-05-25 第十四节课",
-                ResReason: "计网习题课",
-                ClassroomId: 4
+                "StartTime": "2018-05-25 第十三节课",
+                "EndTime": "2018-05-25 第十四节课",
+                "ResReason": "计网习题课",
+                "ClassroomId": 4
         }
 
 + Response 200 (application/json)
@@ -623,22 +661,22 @@ eg: for approver
 
         [
             {
-                DepartmentId: 123,
-                DepartmentName: 团委,
-                Order: 1,
-                Note: "initial"
+                "DepartmentId": 123,
+                "DepartmentName": 团委,
+                "Order": 1,
+                "Note": "initial"
             },
             {
-                DepartmentId: 124,
-                DepartmentName: 学院团委,
-                Order: 2,
-                Note: "middle"
+                "DepartmentId": 124,
+                "DepartmentName": 学院团委,
+                "Order": 2,
+                "Note": "middle"
             },
             {
-                DepartmentId: 125,
-                DepartmentName: 保卫办,
-                Order: 3,
-                Note: "final"
+                "DepartmentId": 125,
+                "DepartmentName": 保卫办,
+                "Order": 3,
+                "Note": "final"
             }
         ]
 ### Add a department to database [POST /api/departmens]
@@ -647,8 +685,8 @@ eg: for approver
 + Request (application/json)
 
         {
-            DepartmentName: 多媒体,
-            Order: 4
+            "DepartmentName": 多媒体,
+            "Order": 4
         }
 
 + Response 200 (application/json)
@@ -659,16 +697,16 @@ eg: for approver
 + Request (application/json)
 
         {
-            DepartmentId: 123
+            "DepartmentId": 123
         }
 
 + Response 200 (application/json)
 
         {
-            DepartmentId: 123,
-            DepartmentName: 团委,
-            Order: 1,
-            Note: "initial"
+            "DepartmentId": 123,
+            "DepartmentName": 团委,
+            "Order": 1,
+            "Note": "initial"
         }
 
 ### Update department information by id [PUT /api/department/{id}]
@@ -678,9 +716,9 @@ DepartmentId can't modify.<br/>
 + Request (application/json)
 
         {
-            DepartmentId: 123,
-            DepartmentName: 团委,
-            Order: 2
+            "DepartmentId": 123,
+            "DepartmentName": 团委,
+            "Order": 2
         }
 
 + Response 200 (application/json)
@@ -692,7 +730,7 @@ Delete the department will result in the approver connected ddeleting.<br/>
 + Request (application/json)
 
         {
-            DepartmentId: 123
+            "DepartmentId": 123
         }
 
 + Response 200 (application/json)
