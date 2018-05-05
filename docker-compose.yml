@@ -21,8 +21,8 @@ services:
     networks:
       - mysql_app
 
-  todolist:
-    image: ccrsystem:latest
+  ccrsystem:
+    image: registry-vpc.cn-shenzhen.aliyuncs.com/ma-image/ccrsystem:latest
     container_name: ccrsystem
     ports:
       - "8080:8080"
