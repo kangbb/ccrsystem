@@ -10,7 +10,7 @@ services:
       - "443:443"
     volumes:
       - $HOME/etc/nginx/conf.d:/etc/nginx/conf.d
-      - $HOME/opt:/etc/ssl/certs
+      - $HOME/opt/ssl/certs:/etc/ssl/certs
     links:
       - ccrsystem
     logging:

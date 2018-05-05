@@ -10,6 +10,7 @@ WORKDIR /ccrSystem
 ADD  ccrsystem /ccrSystem
 ADD static /ccrSystem/static
 ADD views /ccrSystem/views
+ADD session /ccrSystem/session
 
 # expose the application to 8080
 EXPOSE 8080
