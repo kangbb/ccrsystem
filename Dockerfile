@@ -1,20 +1,21 @@
 FROM golang:latest
 
 # get workdir
-RUN mkdir /toDoList
+RUN mkdir /ccrSystem
 
 # set workdir
-WORKDIR /toDoList
+WORKDIR /ccrSystem
 
 # copy file
-ADD  todolist /toDoList
-ADD static /toDoList/static
+ADD  ccrsystem /ccrSystem
+ADD static /ccrSystem/static
+ADD views /ccrSystem/views
 
-# expose the application to 8081
+# expose the application to 8080
 EXPOSE 8080
 
 # give a permission
-RUN chmod +x todolist
+RUN chmod +x ccrsystem
 
 # Set the entry point of the container to the application executable
-ENTRYPOINT [ "./todolist" ]
+ENTRYPOINT [ "./ccrsystem" ]

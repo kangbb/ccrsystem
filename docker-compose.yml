@@ -4,7 +4,7 @@ services:
     image: nginx:latest
     container_name: web
     depends_on:
-      - todolist
+      - ccrsystem
     ports:
       - "80:80"
       - "443:443"
@@ -12,7 +12,7 @@ services:
       - $HOME/etc/nginx/conf.d:/etc/nginx/conf.d
       - $HOME/opt:/etc/ssl/certs
     links:
-      - todolist
+      - ccrsystem
     logging:
       driver: "json-file"
       options:
@@ -22,8 +22,8 @@ services:
       - mysql_app
 
   todolist:
-    image: todolist:latest
-    container_name: todolist
+    image: ccrsystem:latest
+    container_name: ccrsystem
     ports:
       - "8080:8080"
     logging:
