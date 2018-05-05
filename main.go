@@ -1,13 +1,17 @@
 package main
 
 import (
+	"encoding/gob"
 	"os"
+	"time"
 
+	"github.com/kangbb/ccrsystem/core/controller"
 	flag "github.com/spf13/pflag"
-	"github.com/kangbb/todolist/core/controller"
 )
 
 func main() {
+	gob.Register(time.Time{})
+
 	var PORT = os.Getenv("PORT")
 	if len(PORT) == 0 {
 		PORT = "8080"

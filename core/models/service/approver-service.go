@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/kangbb/class-reservation/core/models/entities"
+	"github.com/kangbb/ccrsystem/core/models/entities"
 )
 
 type ApproverInfoService struct{}

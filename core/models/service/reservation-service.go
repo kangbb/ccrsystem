@@ -3,7 +3,7 @@ package service
 import (
 	"time"
 
-	"github.com/kangbb/class-reservation/core/models/entities"
+	"github.com/kangbb/ccrsystem/core/models/entities"
 )
 
 type ReservationInfoService struct{}

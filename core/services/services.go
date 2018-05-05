@@ -15,10 +15,10 @@ import (
 
 	simplejson "github.com/bitly/go-simplejson"
 	"github.com/gorilla/sessions"
-	"github.com/kangbb/class-reservation/core/models/service"
+	"github.com/kangbb/ccrsystem/core/models/service"
 )
 
-var store = sessions.NewFilesystemStore("./session")
+var store = sessions.NewFilesystemStore("./session", []byte("ccrsystem"))
 
 /******************************** Render File *************************/
 func RenderFile(name string, w http.ResponseWriter, r *http.Request) {
@@ -43,7 +43,9 @@ func RenderFile(name string, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+
 	t := template.Must(template.ParseFiles(filepath))
+	w.WriteHeader(200)
 	t.Execute(w, nil)
 }
 
@@ -62,21 +64,29 @@ func Signin(userType string, w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "user")
 
 	// UserTypeEnum = []string{"Student", "Admin", "Approver"}
-	r.ParseForm()
-	id, _ = strconv.Atoi(r.Form[userType+"Id"][0])
-	pwd = r.Form[userType+"Pwd"][0]
+	defer r.Body.Close()
+	js, err := simplejson.NewFromReader(r.Body)
+	if err != nil {
+		log.Println(err)
+		w.WriteHeader(500)
+		return
+	}
+
+	id = js.Get(userType + "Id").MustInt()
+	pwd = js.Get(userType + "Pwd").MustString()
 	switch userType {
 	case "Student":
 		usr := service.StudentService.FindInfoById(id)
 		if usr != nil && usr.StudentPwd == encryptPwd(id, pwd) {
 			session.Values["name"] = usr.StudentName
-			//redirect the url to student layout
-			req, _ := http.NewRequest("GET", "/student", r.Body)
-			http.Redirect(w, req, "/student", 302)
 		} else {
-			//redirect the utl to login layout
-			req, _ := http.NewRequest("GET", "/", r.Body)
-			http.Redirect(w, req, "/", 302)
+			type Std struct {
+				StudentId  string
+				StudentPwd string
+			}
+			w.WriteHeader(500)
+			data, _ := json.Marshal(Std{"此用户不存在", ""})
+			w.Write(data)
 			return
 		}
 		break
@@ -84,14 +94,14 @@ func Signin(userType string, w http.ResponseWriter, r *http.Request) {
 		usr := service.AdminService.FindInfoById(id)
 		if usr != nil && usr.AdminPwd == encryptPwd(id, pwd) {
 			session.Values["name"] = usr.AdminName
-			session.Options.Path = "/admin"
-			//redirect the url to student layout
-			req, _ := http.NewRequest("GET", "/admin", r.Body)
-			http.Redirect(w, req, "/admin", 302)
 		} else {
-			//redirect the utl to login layout
-			req, _ := http.NewRequest("GET", "/", r.Body)
-			http.Redirect(w, req, "/", 302)
+			type Adm struct {
+				AdminId  string
+				AdminPwd string
+			}
+			w.WriteHeader(500)
+			data, _ := json.Marshal(Adm{"此用户不存在", ""})
+			w.Write(data)
 			return
 		}
 		break
@@ -99,14 +109,14 @@ func Signin(userType string, w http.ResponseWriter, r *http.Request) {
 		usr := service.ApproverService.FindInfoById(id)
 		if usr != nil && usr.ApproverPwd == encryptPwd(id, pwd) {
 			session.Values["name"] = usr.ApproverName
-			session.Options.Path = "/approver"
-			//redirect the url to student layout
-			req, _ := http.NewRequest("GET", "/approver", r.Body)
-			http.Redirect(w, req, "/approver", 302)
 		} else {
-			//redirect the utl to login layout
-			req, _ := http.NewRequest("GET", "/", r.Body)
-			http.Redirect(w, req, "/", 302)
+			type Appr struct {
+				ApproverId  string
+				ApproverPwd string
+			}
+			w.WriteHeader(500)
+			data, _ := json.Marshal(Appr{"此用户不存在", ""})
+			w.Write(data)
 			return
 		}
 	}
@@ -114,10 +124,11 @@ func Signin(userType string, w http.ResponseWriter, r *http.Request) {
 	session.Values["id"] = id
 	session.Values["type"] = userType
 	session.Values["accessTime"] = time.Now()
-	err := session.Save(r, w)
+	err = session.Save(r, w)
 	if err != nil {
 		fmt.Println(err)
 	}
+	w.WriteHeader(200)
 }
 
 /*
@@ -131,6 +142,7 @@ func Signout(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
+
 	req, _ := http.NewRequest("GET", "/", r.Body)
 	http.Redirect(w, req, "/", 302)
 }
@@ -144,7 +156,6 @@ func GetUserInfo(userType string, w http.ResponseWriter, r *http.Request) {
 	if !sessionExist(userType, session, w, r) {
 		return
 	}
-
 	w.WriteHeader(200)
 
 	switch userType {
@@ -222,7 +233,6 @@ func GetUserList(userType string, w http.ResponseWriter, r *http.Request) {
 	if !sessionExist("Admin", session, w, r) {
 		return
 	}
-
 	w.WriteHeader(200)
 
 	switch userType {
@@ -300,6 +310,7 @@ func AddUser(userType string, w http.ResponseWriter, r *http.Request) {
 		state, err = service.AdminService.SaveAInfo(&user)
 		break
 	}
+
 	if !state || err != nil {
 		w.WriteHeader(500)
 	} else {
@@ -457,6 +468,7 @@ func GetClassroomList(w http.ResponseWriter, r *http.Request) {
 
 	classrooms := service.ClassroomService.FindAllInfo()
 	data, _ := json.Marshal(classrooms)
+
 	w.WriteHeader(200)
 	w.Write(data)
 }
@@ -490,6 +502,7 @@ func AddClassroom(w http.ResponseWriter, r *http.Request) {
 	}
 	classroom := service.ClassroomService.NewClassroom(classroomCampus, classroomBuilding, classroomNum, cap)
 	state, err := service.ClassroomService.SaveAInfo(&classroom)
+
 	if !state || err == nil {
 		w.WriteHeader(500)
 	} else {
@@ -595,6 +608,7 @@ func QueryClassroom(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data, _ := json.Marshal(result)
+
 	w.WriteHeader(200)
 	w.Write(data)
 }
@@ -618,6 +632,7 @@ func GetClassroomById(w http.ResponseWriter, r *http.Request) {
 
 	classroom := service.ClassroomService.FindInfoById(js.Get("ClassroomId").MustInt())
 	data, _ := json.Marshal(classroom)
+
 	w.WriteHeader(200)
 	w.Write(data)
 }
@@ -646,6 +661,7 @@ func UpdateClassroomById(w http.ResponseWriter, r *http.Request) {
 	building := js.Get("ClassroomBuilding").MustString()
 	campus := js.Get("ClassroomCampus").MustString()
 	status, err := service.ClassroomService.UpdateInfo(id, cap, num, building, campus)
+
 	if !status || err != nil {
 		w.WriteHeader(500)
 	} else {
@@ -672,6 +688,7 @@ func DeleteClassroomById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	status, err := service.ClassroomService.DeleteInfo(js.Get("ClassroomId").MustInt())
+
 	if !status || err != nil {
 		w.WriteHeader(500)
 	} else {
@@ -731,6 +748,7 @@ func GetResById(w http.ResponseWriter, r *http.Request) {
 		ClassroomId:  res.ClassroomId,
 	}
 	data, _ := json.Marshal(result)
+
 	w.WriteHeader(200)
 	w.Write(data)
 }
@@ -818,6 +836,7 @@ func UpdateResById(w http.ResponseWriter, r *http.Request) {
 
 		state, err := service.ReservationService.UpdateInfo(id, approverId, departmentId,
 			approvalNote, state)
+
 		if !state || err != nil {
 			w.WriteHeader(500)
 		} else {
@@ -846,6 +865,7 @@ func DeleteResById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	state, err := service.ReservationService.DeleteInfo(js.Get("ResId").MustInt())
+
 	if !state || err != nil {
 		w.WriteHeader(500)
 	} else {
@@ -892,6 +912,7 @@ func GetStudentResList(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	data, _ := json.Marshal(result)
+
 	w.WriteHeader(200)
 	w.Write(data)
 }
@@ -938,6 +959,7 @@ func GetApproverResList(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	data, _ := json.Marshal(result)
+
 	w.WriteHeader(200)
 	w.Write(data)
 }
@@ -1010,6 +1032,7 @@ func AddRes(w http.ResponseWriter, r *http.Request) {
 	res := service.ReservationService.NewReservation(state, start, end, departmentId, reason,
 		approvalNote, studentId, approverId, classroomId)
 	result, err := service.ReservationService.SaveAInfo(&res)
+
 	if !result || err != nil {
 		w.WriteHeader(500)
 	} else {
@@ -1029,6 +1052,7 @@ func GetDepartmentList(w http.ResponseWriter, r *http.Request) {
 
 	departments := service.DepartmentService.FindAllInfo()
 	data, _ := json.Marshal(departments)
+
 	w.WriteHeader(200)
 	w.Write(data)
 }
@@ -1036,7 +1060,7 @@ func GetDepartmentList(w http.ResponseWriter, r *http.Request) {
 /*
 * Add a department information to db
  */
-func addDepartment(w http.ResponseWriter, r *http.Request) {
+func AddDepartment(w http.ResponseWriter, r *http.Request) {
 	session, _ := store.Get(r, "user")
 	if !sessionExist("Admin", session, w, r) {
 		return
@@ -1088,6 +1112,7 @@ func addDepartment(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.WriteHeader(200)
 	}
+
 }
 
 /*
@@ -1109,6 +1134,7 @@ func GetDepartmentById(w http.ResponseWriter, r *http.Request) {
 
 	department := service.DepartmentService.FindInfoById(js.Get("DepartmentId").MustInt())
 	data, _ := json.Marshal(department)
+
 	w.WriteHeader(200)
 	w.Write(data)
 }
@@ -1152,6 +1178,7 @@ func UpdateDepartmentById(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(500)
 		}
 	}
+
 	w.WriteHeader(200)
 }
 
@@ -1233,10 +1260,10 @@ func lessonToTime(lessonTime string) time.Time {
 	reg = regexp.MustCompile(`[\p{Han}]+`)
 	hanstr := []rune(reg.FindAllString(lessonTime, -1)[0])
 	switch len(hanstr) {
-	case 3:
+	case 4:
 		lesson = mappingRegular[string(hanstr[1])]
 		break
-	case 4:
+	case 5:
 		lesson = mappingRegular[string(hanstr[1])]*10 + mappingRegular[string(hanstr[2])]
 		break
 	}
@@ -1245,6 +1272,7 @@ func lessonToTime(lessonTime string) time.Time {
 	addTime, _ := time.ParseDuration(duraTime)
 	return startTime.Add(addTime)
 }
+
 func timeToLesson(trueTime time.Time) string {
 	mappingRegular := []string{"一", "二", "三", "四", "五", "六", "七", "八", "九", "十"}
 	var lesson string
@@ -1285,6 +1313,11 @@ func encryptPwd(id int, pwd string) string {
 }
 
 func sessionExist(userType string, session *sessions.Session, w http.ResponseWriter, r *http.Request) bool {
+	if session.Values["id"] == nil || session.Values["type"] == nil || session.Values["accessTime"] == nil {
+		req, _ := http.NewRequest("GET", "/", r.Body)
+		http.Redirect(w, req, "/", 302)
+		return false
+	}
 	//session doesn't exist
 	//session expired
 	now := time.Now()
