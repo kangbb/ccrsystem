@@ -129,11 +129,11 @@ func addRes() {
 
 }
 
-func init() {
-	addStudent()
-	addAdmin()
-	addApprover()
-	addClassroom()
-	addDep()
-	addRes()
-}
+// func init() {
+// 	addStudent()
+// 	addAdmin()
+// 	addApprover()
+// 	addClassroom()
+// 	addDep()
+// 	addRes()
+// }
