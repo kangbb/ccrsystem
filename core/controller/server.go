@@ -20,15 +20,15 @@ func GetServer() *negroni.Negroni {
 	}
 	r := mux.NewRouter()
 	//load static template
-	r.HandleFunc("/", getIndex)
-	r.HandleFunc("/student", getStudentIndex)
-	r.HandleFunc("/approver", getApproverIndex)
-	r.HandleFunc("/admin", getAdminIndex)
+	r.HandleFunc("/", getIndex).Methods("GET")
+	r.HandleFunc("/student", getStudentIndex).Methods("GET")
+	r.HandleFunc("/approver", getApproverIndex).Methods("GET")
+	r.HandleFunc("/admin", getAdminIndex).Methods("GET")
 	// function interface
-	r.HandleFunc("/signout", signout)
-	r.HandleFunc("/student/signin", studentSignin)
-	r.HandleFunc("/approver/signin", approverSignin)
-	r.HandleFunc("/admin/signin", adminSignin)
+	r.HandleFunc("/signout", signout).Methods("POST")
+	r.HandleFunc("/student/signin", studentSignin).Methods("POST")
+	r.HandleFunc("/approver/signin", approverSignin).Methods("POST")
+	r.HandleFunc("/admin/signin", adminSignin).Methods("POST")
 	// data interface
 	//for student
 	r.HandleFunc("/api/users/student", getStudentInfo).Methods("GET")
@@ -74,6 +74,62 @@ func GetServer() *negroni.Negroni {
 	r.HandleFunc("/api/departments/{id}", getDepartmentById).Methods("GET")
 	r.HandleFunc("/api/departments/{id}", updateDepartmentById).Methods("PUT")
 	r.HandleFunc("/api/departments/{id}", deleteDepartmentById).Methods("DELETE")
+
+	// 跨域控制， 暂定
+	r.HandleFunc("/", getIndex).Methods("OPTIONS")
+	r.HandleFunc("/student", getStudentIndex).Methods("OPTIONS")
+	r.HandleFunc("/approver", getApproverIndex).Methods("OPTIONS")
+	r.HandleFunc("/admin", getAdminIndex).Methods("OPTIONS")
+	// function interface
+	r.HandleFunc("/signout", signout).Methods("OPTIONS")
+	r.HandleFunc("/student/signin", studentSignin).Methods("OPTIONS")
+	r.HandleFunc("/approver/signin", approverSignin).Methods("OPTIONS")
+	r.HandleFunc("/admin/signin", adminSignin).Methods("OPTIONS")
+	// data interface
+	//for student
+	r.HandleFunc("/api/users/student", getStudentInfo).Methods("OPTIONS")
+	r.HandleFunc("/api/users/student", updateStudentInfo).Methods("OPTIONS")
+	r.HandleFunc("/api/users/students", getStudentList).Methods("OPTIONS")
+	r.HandleFunc("/api/users/students", addStudent).Methods("OPTIONS")
+	r.HandleFunc("/api/users/students/{id}", getStudentById).Methods("OPTIONS")
+	r.HandleFunc("/api/users/students/{id}", updateStudentById).Methods("OPTIONS")
+	r.HandleFunc("/api/users/students/{id}", deleteStudentById).Methods("OPTIONS")
+	//for approver
+	r.HandleFunc("/api/users/approver", getApproverInfo).Methods("OPTIONS")
+	r.HandleFunc("/api/users/approver", updateApproverInfo).Methods("OPTIONS")
+	r.HandleFunc("/api/users/approvers", getApproverList).Methods("OPTIONS")
+	r.HandleFunc("/api/users/approvers", addApprover).Methods("OPTIONS")
+	r.HandleFunc("/api/users/approvers/{id}", getApproverById).Methods("OPTIONS")
+	r.HandleFunc("/api/users/approvers/{id}", updateApproverById).Methods("OPTIONS")
+	r.HandleFunc("/api/users/approvers/{id}", deleteApproverById).Methods("OPTIONS")
+	//for admin
+	r.HandleFunc("/api/users/admin", getAdminInfo).Methods("OPTIONS")
+	r.HandleFunc("/api/users/admin", updateAdminInfo).Methods("OPTIONS")
+	r.HandleFunc("/api/users/admins", getAdminList).Methods("OPTIONS")
+	r.HandleFunc("/api/users/admins", addAdmin).Methods("OPTIONS")
+	r.HandleFunc("/api/users/admins/{id}", getAdminById).Methods("OPTIONS")
+	r.HandleFunc("/api/users/admins/{id}", updateAdminById).Methods("OPTIONS")
+	r.HandleFunc("/api/users/admins/{id}", deleteAdminById).Methods("OPTIONS")
+	//for classroom
+	r.HandleFunc("/api/classrooms", getClassroomList).Methods("OPTIONS")
+	r.HandleFunc("/api/classrooms", addClassroom).Methods("OPTIONS")
+	r.HandleFunc("/api/classrooms/state", queryClassroom)
+	r.HandleFunc("/api/classrooms/{id}", getClassroomById).Methods("OPTIONS")
+	r.HandleFunc("/api/classrooms/{id}", updateClassroomById).Methods("OPTIONS")
+	r.HandleFunc("/api/classrooms/{id}", deleteClassroomById).Methods("OPTIONS")
+	//for reservation
+	r.HandleFunc("/api/reservations/{id}", getResById).Methods("OPTIONS")
+	r.HandleFunc("/api/reservations/{id}", updateResById).Methods("OPTIONS")
+	r.HandleFunc("/api/reservations/{id}", deleteResById).Methods("OPTIONS")
+	r.HandleFunc("/api/users/student/reservations", addRes).Methods("OPTIONS")
+	r.HandleFunc("/api/users/student/reservations", getStudentResList).Methods("OPTIONS")
+	r.HandleFunc("/api/users/approver/reservations", getApproverResList)
+	//for department
+	r.HandleFunc("/api/departments", getDepartmentList).Methods("OPTIONS")
+	r.HandleFunc("/api/departments", addDepartment).Methods("OPTIONS")
+	r.HandleFunc("/api/departments/{id}", getDepartmentById).Methods("OPTIONS")
+	r.HandleFunc("/api/departments/{id}", updateDepartmentById).Methods("OPTIONS")
+	r.HandleFunc("/api/departments/{id}", deleteDepartmentById).Methods("OPTIONS")
 
 	static := "static"
 	r.PathPrefix("/static").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(webRoot+static))))

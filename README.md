@@ -160,3 +160,6 @@ type DepartmentInfo struct {
 格式：
 1. 节数 eg:"2016-10-01 第一节"
 2. 时间 eg:"2016-10-01 08:00"
+
+## git提交注意事项
+每次提交之前，需要执行`go build .`
