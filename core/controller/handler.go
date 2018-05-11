@@ -213,4 +213,5 @@ func accessControl(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Access-Control-Allow-Headers", "Origin, X-Requested-With, X-HTTP-Method-Override,accept-charset,accept-encoding , Content-Type, Accept, Cookie")
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
+	w.Write([]byte("跨域已经可以"))
 }
