@@ -123,11 +123,11 @@ export default {
       this.showList1 = true
 
       this.waitApproveList = []
-      var apiStr = 'http://www.kangblog.top/api/users/student/reservations';
-      this.$http.get(apiStr).then(res=>{
-        console.log(res);
-      })
- /*     this.$http.get('/api/student/reservation').then(res => {
+      // var apiStr = 'http://www.kangblog.top/api/users/student/reservations';
+      // this.$http.get(apiStr).then(res=>{
+      //   console.log(res);
+      // })
+      this.$http.get('/api/student/reservation').then(res => {
         res = res.body.data
         //  console.log(res);
         for (var item in res) {
@@ -142,7 +142,7 @@ export default {
         } else {
           this.showList2 = true
         }
-      })*/
+      })
     },
     toAlreadyApprove () {
       this.showWaitApprove = false
@@ -151,11 +151,11 @@ export default {
       this.showList2 = true
       this.alreadyApproveList = []
 
-      var apiStr ='http://www.kangblog.top/api/users/student/reservations'
-      this.$http.get(apiStr).then(res=>{
-        console.log(res);
-      })
- /*     this.$http.get('/api/student/reservation').then(res => {
+      // var apiStr ='http://www.kangblog.top/api/users/student/reservations'
+      // this.$http.get(apiStr).then(res=>{
+      //   console.log(res);
+      // })
+      this.$http.get('/api/student/reservation').then(res => {
         res = res.body.data
         // console.log(res);
         for (var item in res) {
@@ -174,7 +174,7 @@ export default {
         } else {
           this.showList1 = true
         }
-      })*/
+      })
       console.log('already to re:' + this.alreadyApproveList)
     },
     dateToStr (date) {

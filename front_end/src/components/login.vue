@@ -55,10 +55,10 @@ export default {
         obj[jid] = intId;
         obj[jpwd] = this.password;
 
-        var apiStr = 'http://www.kangblog.top/' + param + '/signin'
+        // var apiStr = 'http://www.kangblog.top/' + param + '/signin'
+        var apiStr = param + '/signin'
         this.$http.post(apiStr, obj).then(res=> {
           console.log(res);
-          setCookie(jid, this.id, 1000 * 60)
           this.$router.push('/' + param)
         }, error=>{
             this.id = ''
