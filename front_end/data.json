@@ -1,0 +1,222 @@
+{
+  "students": [
+    {
+      "StudentId": 1,
+      "StudentPwd": "1"
+    },
+    {
+      "StudentId": 2,
+      "StudentPwd": "2"
+    },
+    {
+      "StudentId": 3,
+      "StudentPwd": "3"
+    }
+  ],
+  "admins": [
+    {
+      "AdminId": 11,
+      "AdminPwd": "11"
+    },
+    {
+      "AdminId": 22,
+      "AdminPwd": "22"
+    },
+    {
+      "AdminId": 33,
+      "AdminPwd": "33"
+    }
+  ],
+  "approvers": [
+    {
+      "ApproverId": 111,
+      "ApproverPwd": "111"
+    },
+    {
+      "ApproverId": 222,
+      "ApproverPwd": "222"
+    },
+    {
+      "ApproverId": 333,
+      "ApproverPwd": "333"
+    }
+  ],
+  "classrooms": [
+    {
+      "ClassroomId":1,
+      "Capacity": 50,
+      "ClassroomNum": "A101"
+    },
+    {
+      "ClassroomId":2,
+      "Capacity": 50,
+      "ClassroomNum": "A102"
+    },
+    {
+      "ClassroomId":3,
+      "Capacity": 50,
+      "ClassroomNum": "A103"
+    },
+    {
+      "ClassroomId":4,
+      "Capacity": 50,
+      "ClassroomNum": "A201"
+    },
+    {
+      "ClassroomId":5,
+      "Capacity": 50,
+      "ClassroomNum": "A202"
+    },
+    {
+      "ClassroomId":6,
+      "Capacity": 100,
+      "ClassroomNum": "B101"
+    },
+    {
+      "ClassroomId":7,
+      "Capacity": 100,
+      "ClassroomNum": "B102"
+    },
+    {
+      "ClassroomId":8,
+      "Capacity": 100,
+      "ClassroomNum": "B103"
+    },
+    {
+      "ClassroomId":9,
+      "Capacity": 100,
+      "ClassroomNum": "B104"
+    },
+    {
+      "ClassroomId":10,
+      "Capacity": 100,
+      "ClassroomNum": "B105"
+    },
+    {
+      "ClassroomId":11,
+      "Capacity": 200,
+      "ClassroomNum": "C101"
+    },
+    {
+      "ClassroomId":12,
+      "Capacity": 200,
+      "ClassroomNum": "C102"
+    },
+    {
+      "ClassroomId":13,
+      "Capacity": 200,
+      "ClassroomNum": "C103"
+    },
+    {
+      "ClassroomId":14,
+      "Capacity": 200,
+      "ClassroomNum": "C104"
+    },
+    {
+      "ClassroomId":15,
+      "Capacity": 200,
+      "ClassroomNum": "C105"
+    }
+  ],
+  "reservations": [
+    {
+      "ReservationId":1,
+      "ClassroomId":1,
+      "StudentId":1,
+      "Capacity":50,
+      "Date" : {
+        "Year" :2018,
+        "Month":5,
+        "Day":20
+      },
+      "Time":[3, 4],
+      "ReservationState":0,
+      "ReservationInfo":"1班团日活动",
+      "Organization":"数据院软工一班",
+      "ClassroomNum": "A101"
+    },
+    {
+      "ReservationId":2,
+      "ClassroomId":8,
+      "StudentId":2,
+      "ApproverId":111,
+      "Capacity":100,
+      "Date" : {
+        "Year" :2018,
+        "Month":5,
+        "Day":20
+      },
+      "Time":[5, 8],
+      "ReservationState":1,
+      "ReservationInfo":"学生会长竞选",
+      "Organization":"数据院学生会",
+      "ClassroomNum": "B103"
+    },
+    {
+      "ReservationId":3,
+      "ClassroomId":12,
+      "StudentId":1,
+      "ApproverId":111,
+      "Capacity":200,
+      "Date" : {
+        "Year" :2018,
+        "Month":5,
+        "Day":20
+      },
+      "Time":[5, 8],
+      "ReservationState":1,
+      "ReservationInfo":"2班团日活动",
+      "Organization":"数据院软工二班",
+      "ClassroomNum": "C102"
+    },
+    {
+      "ReservationId":4,
+      "ClassroomId":2,
+      "StudentId":1,
+      "Capacity":50,
+      "Date" : {
+        "Year" :2018,
+        "Month":5,
+        "Day":20
+      },
+      "Time":[3, 4],
+      "ReservationState":0,
+      "ReservationInfo":"3班团日活动",
+      "Organization":"数据院软工三班",
+      "ClassroomNum": "A102"
+    },
+    {
+      "ReservationId":5,
+      "ClassroomId":13,
+      "StudentId":2,
+      "Capacity":200,
+      "Date" : {
+        "Year" :2018,
+        "Month":5,
+        "Day":20
+      },
+      "Time":[5, 8],
+      "ReservationState":0,
+      "ReservationInfo":"5班团日活动",
+      "Organization":"数据院软工五班",
+      "ClassroomNum": "C103"
+    },
+    {
+      "ReservationId":6,
+      "ClassroomId":10,
+      "StudentId":2,
+      "ApproverId":222,
+      "Capacity":100,
+      "Date" : {
+        "Year" :2018,
+        "Month":5,
+        "Day":20
+      },
+      "Time":[1, 2],
+      "ReservationState":1,
+      "ReservationInfo":"8班团日活动",
+      "Organization":"数据院软工八班",
+      "ClassroomNum": "B105"
+    }
+  ]
+}
