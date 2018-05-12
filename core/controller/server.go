@@ -131,7 +131,7 @@ func GetServer() *negroni.Negroni {
 	r.HandleFunc("/api/departments/{id}", accessControl).Methods("OPTIONS")
 	r.HandleFunc("/api/departments/{id}", accessControl).Methods("OPTIONS")
 
-	static := "static"
+	static := "/static/"
 	r.PathPrefix("/static").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(webRoot+static))))
 
 	s := negroni.Classic()
