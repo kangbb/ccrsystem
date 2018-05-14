@@ -163,3 +163,6 @@ type DepartmentInfo struct {
 
 ## git提交注意事项
 每次提交之前，需要执行`go build .`
+
+## 前端了解跨域问题
+[跨域资源共享 CORS 详解](http://www.ruanyifeng.com/blog/2016/04/cors.html)

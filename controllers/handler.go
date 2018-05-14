@@ -297,7 +297,7 @@ func validatePerm(userType []string, isNeedValidateId bool, w http.ResponseWrite
 	}
 	// Permission deny
 	w.WriteHeader(401)
-	data, _ := json.Marshal(logs.ErrorMsg{"Permission deny."})
+	data, _ := json.Marshal(logs.ErrorMsg{Msg: "Permission deny."})
 	w.Write(data)
 	return false
 }

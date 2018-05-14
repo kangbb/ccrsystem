@@ -7,6 +7,7 @@ services:
       - "3307:3306"
     volumes:
       - $HOME/Work/data/dbmaster:/var/lib/mysql
+    privileged: true
     environment:
       MYSQL_ROOT_PASSWORD: master
     logging:
@@ -26,6 +27,8 @@ services:
       - dbmaster
     volumes:
       - $HOME/Work/data/dbslave:/var/lib/mysql
+    # 允许本地操作共享数据卷
+    privileged: true
     environment:
       MYSQL_ROOT_PASSWORD: slave
     logging:
