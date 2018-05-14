@@ -1167,6 +1167,116 @@ func deleteDepartmentById(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 }
 
+/************************* Data Interface For Organization ***********************/
+/*
+* Get a list of organizations.
+* Just accessed for admin.
+ */
+func getOrganizationList(w http.ResponseWriter, r *http.Request) {
+	orgs, err := services.OrganizationService.FindAllInfo()
+	if logs.SqlError(err, w, len(orgs) != 0) {
+		return
+	}
+
+	data, _ := json.Marshal(orgs)
+	w.WriteHeader(200)
+	w.Write(data)
+}
+
+/*
+* Add a organization to db.
+* Just accessed for admin
+ */
+func addOrganization(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+	js, err := simplejson.NewFromReader(r.Body)
+	if logs.NormalError(err, w) {
+		return
+	}
+
+	name := js.Get("OrganizationName").MustString()
+	intro := js.Get("Introduction").MustString()
+	if name == "" || intro == "" {
+		w.WriteHeader(500)
+		data, _ := json.Marshal(logs.ErrorMsg{Msg: "必填字段不能为空"})
+		w.Write(data)
+	}
+
+	org := services.OrganizationService.NewOrganization(name, intro)
+	err = services.OrganizationService.SaveAInfo(org)
+	if logs.SqlError(err, w, true) {
+		return
+	}
+	w.WriteHeader(200)
+}
+
+/*
+* Get a piece of organization iformation.
+* Accessed for the admin, and student.
+ */
+func getOrganizationById(w http.ResponseWriter, r *http.Request) {
+	id := getIdFromPath(r)
+
+	org, err := services.OrganizationService.FindInfoById(id)
+	if logs.SqlError(err, w, org.OrganizationName != "") {
+		return
+	}
+
+	data, _ := json.Marshal(*org)
+	w.WriteHeader(200)
+	w.Write(data)
+}
+
+/*
+* Update the organization, include the name and introduction.
+* Just accessed for the admin.
+ */
+func updateOrganizationById(w http.ResponseWriter, r *http.Request) {
+	id := getIdFromPath(r)
+
+	defer r.Body.Close()
+	js, err := simplejson.NewFromReader(r.Body)
+	if logs.NormalError(err, w) {
+		return
+	}
+
+	name := js.Get("OrganizationName").MustString()
+	intro := js.Get("Introduction").MustString()
+	err = services.OrganizationService.UpdateInfo(id, name, intro)
+	if logs.SqlError(err, w, true) {
+		return
+	}
+	w.WriteHeader(200)
+}
+
+/*
+* Delete a piece of organization information
+* Default will change the students information who are associated with the delete information.
+ */
+func deleteOrganizationById(w http.ResponseWriter, r *http.Request) {
+	id := getIdFromPath(r)
+
+	// Delete the organization
+	err := services.OrganizationService.DeleteInfo(id)
+	if logs.SqlError(err, w, true) {
+		return
+	}
+	// Change the student information associated
+	stds, err := services.StudentService.FindInfoByOrganizationId(id)
+	if logs.SqlError(err, w, len(stds) != 0) {
+		return
+	}
+
+	for _, v := range stds {
+		err = services.StudentService.UpdatetOrganizationInfo(v.StudentId, 1)
+		if logs.SqlError(err, w, true) {
+			return
+		}
+	}
+
+	w.WriteHeader(200)
+}
+
 /***********************************SOME SUBFUNCTION*******************************/
 func lessonToTime(lessonTime string) time.Time {
 	mappingRegular := map[string]int{

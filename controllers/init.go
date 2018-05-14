@@ -91,10 +91,10 @@ func initDep() {
 * Add some organization information.
  */
 func initOrg() {
-	org := services.OrganizationService.NewOrganization("中山大学东校园学生会", "致力于为学生提供优质服务，方便学生们的学习生活")
+	org := services.OrganizationService.NewOrganization("个人", "这是所有特立独行的人的组织")
 	services.OrganizationService.SaveAInfo(org)
 
-	org = services.OrganizationService.NewOrganization("个人", "这是所有特立独行的人的组织")
+	org = services.OrganizationService.NewOrganization("中山大学东校园学生会", "致力于为学生提供优质服务，方便学生们的学习生活")
 	services.OrganizationService.SaveAInfo(org)
 
 	org = services.OrganizationService.NewOrganization("中大青年", "汇聚中大资讯，树洞欢迎你")

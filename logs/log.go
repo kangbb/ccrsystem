@@ -47,6 +47,12 @@ func init() {
 func SqlError(err error, w http.ResponseWriter, hasResult bool) bool {
 	var msg []byte
 	var pat *regexp.Regexp
+
+	// for some conditions, err = nil, hasResult = true, needn't too much judge
+	if err == nil && hasResult {
+		return false
+	}
+
 	// The insert information includes a incorrect string value.
 	pat = regexp.MustCompile("Error 1366")
 	if res := pat.FindString(err.Error()); len(res) != 0 {
@@ -85,7 +91,7 @@ func SqlError(err error, w http.ResponseWriter, hasResult bool) bool {
 		Log.Println("The query result is empty.")
 		return true
 	}
-	// If no error, return true.
+
 	return false
 }
 

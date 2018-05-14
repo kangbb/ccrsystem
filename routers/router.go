@@ -70,6 +70,12 @@ func GetRouters() *mux.Route {
 	r.HandleFunc("/api/departments/{id}", controllers.GetDepartmentById).Methods("GET")
 	r.HandleFunc("/api/departments/{id}", controllers.UpdateDepartmentById).Methods("PUT")
 	r.HandleFunc("/api/departments/{id}", controllers.DeleteDepartmentById).Methods("DELETE")
+	// For organization
+	r.HandleFunc("/api/organizations", controllers.GetOrganizationList).Methods("GET")
+	r.HandleFunc("/api/organizations", controllers.AddOrganization).Methods("POST")
+	r.HandleFunc("/api/organizations/{id}", controllers.GetOrganizationById).Methods("GET")
+	r.HandleFunc("/api/organizations/{id}", controllers.UpdateOrganizationById).Methods("PUT")
+	r.HandleFunc("/api/organizations/{id}", controllers.DeleteOrganizationById).Methods("DELETE")
 	// For request not found
 	//r.NotFoundHandler(NotFoundHandler)
 

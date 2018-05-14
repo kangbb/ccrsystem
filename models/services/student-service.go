@@ -41,6 +41,16 @@ func (*StudentInfoService) FindInfoById(id int) (*entities.StudentInfo, error) {
 }
 
 /*
+* Get a student information by organizationId
+ */
+func (*StudentInfoService) FindInfoByOrganizationId(organizationId int) ([]entities.StudentInfo, error) {
+	stds := make([]entities.StudentInfo, 0)
+	err := entities.SlaveEngine.Where("department_id = ?", organizationId).Find(stds)
+
+	return stds, err
+}
+
+/*
 * Find all student information
  */
 func (*StudentInfoService) FindAllInfo() ([]entities.StudentInfo, error) {
