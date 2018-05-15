@@ -10,12 +10,15 @@ API使用`showdoc`进行管理，地址如下：
 
 [https://www.showdoc.cc/web/#/69795491818399](https://www.showdoc.cc/web/#/69795491818399)
 
+【密码】：123456
+
 ### 数据字典
 
 定义了前后端数据交互的数据表格式以及数据库中对应的数据表格式。
 
 [https://www.showdoc.cc/web/#/69795491818399](https://www.showdoc.cc/web/#/69795491818399)
 
+【密码】：123456
 
 ## 后端
 
