@@ -2,9 +2,10 @@
 * This file include some middlewares.
 * Some of them are used by gorilla/mux.
  */
-package middlwares
+package middlewares
 
 import (
+	"encoding/gob"
 	"net/http"
 	"regexp"
 	"time"
@@ -19,6 +20,7 @@ var store *sessions.FilesystemStore
 * Initial the session store.
  */
 func init() {
+	gob.Register(time.Time{})
 	store = sessions.NewFilesystemStore("./data/sessions", []byte("ccrsystem"))
 }
 
@@ -55,7 +57,7 @@ func CorsHandler(next http.Handler) http.Handler {
 func Authentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Some url needn't to validate the session
-		var matched, _ = regexp.MatchString(".*signin", "/student/signin")
+		var matched, _ = regexp.MatchString(".*signin", r.URL.Path)
 		if r.URL.Path == "/" || matched {
 			next.ServeHTTP(w, r)
 			return
@@ -106,6 +108,7 @@ func SessionProcess(w http.ResponseWriter, r *http.Request, arg ...interface{}) 
 		session.Values["type"] = arg[1].(string)
 		session.Values["name"] = arg[2].(string)
 		session.Values["accessTime"] = time.Now()
+		session.Options.MaxAge = 86400
 		err = session.Save(r, w)
 		if logs.NormalError(err, w) {
 			return false

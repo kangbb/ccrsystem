@@ -45,7 +45,7 @@ func (*StudentInfoService) FindInfoById(id int) (*entities.StudentInfo, error) {
  */
 func (*StudentInfoService) FindInfoByOrganizationId(organizationId int) ([]entities.StudentInfo, error) {
 	stds := make([]entities.StudentInfo, 0)
-	err := entities.SlaveEngine.Where("department_id = ?", organizationId).Find(stds)
+	err := entities.SlaveEngine.Where("department_id = ?", organizationId).Find(&stds)
 
 	return stds, err
 }
@@ -54,10 +54,10 @@ func (*StudentInfoService) FindInfoByOrganizationId(organizationId int) ([]entit
 * Find all student information
  */
 func (*StudentInfoService) FindAllInfo() ([]entities.StudentInfo, error) {
-	std := make([]entities.StudentInfo, 0)
-	err := entities.SlaveEngine.Find(&std)
+	stds := make([]entities.StudentInfo, 0)
+	err := entities.SlaveEngine.Find(&stds)
 
-	return std, err
+	return stds, err
 }
 
 /*

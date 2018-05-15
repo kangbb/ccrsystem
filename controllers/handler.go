@@ -83,7 +83,7 @@ func UpdateStudentById(w http.ResponseWriter, r *http.Request) {
 	updateUserById("Student", w, r)
 }
 func DeleteStudentById(w http.ResponseWriter, r *http.Request) {
-	if !validatePerm([]string{"Adimin"}, false, w, r) {
+	if !validatePerm([]string{"Admin"}, false, w, r) {
 		return
 	}
 	deleteUserById("Student", w, r)
@@ -158,7 +158,7 @@ func AddAdmin(w http.ResponseWriter, r *http.Request) {
 	}
 	addUser("Admin", w, r)
 }
-func getAdminById(w http.ResponseWriter, r *http.Request) {
+func GetAdminById(w http.ResponseWriter, r *http.Request) {
 	if !validatePerm([]string{"Admin"}, false, w, r) {
 		return
 	}

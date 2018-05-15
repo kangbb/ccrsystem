@@ -7,10 +7,13 @@ package logs
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"regexp"
+	"runtime"
+	"strings"
 	"time"
 )
 
@@ -37,14 +40,14 @@ func init() {
 	}
 
 	// New a logger object.
-	Log = log.New(f, "[Error]", log.Ldate|log.Ltime|log.Lmicroseconds|log.Lshortfile)
+	Log = log.New(f, "[Error]", log.Ldate|log.Ltime|log.Lmicroseconds)
 }
 
 /*
 * Process the sql operation error, judge whether the error is exist.
 * If there is a error, return true; else, return false.
  */
-func SqlError(err error, w http.ResponseWriter, hasResult bool) bool {
+func SqlError(err error, w http.ResponseWriter, hasResult bool, arg ...interface{}) bool {
 	var msg []byte
 	var pat *regexp.Regexp
 
@@ -53,31 +56,37 @@ func SqlError(err error, w http.ResponseWriter, hasResult bool) bool {
 		return false
 	}
 
-	// The insert information includes a incorrect string value.
-	pat = regexp.MustCompile("Error 1366")
-	if res := pat.FindString(err.Error()); len(res) != 0 {
-		w.WriteHeader(500)
-		msg, _ = json.Marshal(ErrorMsg{Msg: "您插入的信息字段包含非法字符"})
-		w.Write(msg)
-		Log.Println(err.Error())
-		return true
-	}
-	// The insert information has a duplicate primary key.
-	pat = regexp.MustCompile("Error 1062")
-	if res := pat.FindString(err.Error()); len(res) != 0 {
-		w.WriteHeader(500)
-		msg, _ = json.Marshal(ErrorMsg{Msg: "该条信息已经存在"})
-		w.Write(msg)
-		Log.Println(err.Error())
-		return true
-	}
-	// Other errors, regard all of them as exception.
+	// Get the file who calls the function.
+	_, file, line, _ := runtime.Caller(1)
+	pathArray := strings.Split(file, "/")
+	fname := pathArray[len(pathArray)-1]
+
+	// Judge the err pripority.
 	if err != nil {
+		// The insert information includes a incorrect string value.
+		pat = regexp.MustCompile("Error 1366")
+		if res := pat.FindString(err.Error()); len(res) != 0 {
+			w.WriteHeader(500)
+			msg, _ = json.Marshal(ErrorMsg{Msg: "您插入的信息字段包含非法字符"})
+			w.Write(msg)
+			Log.Println(fname + fmt.Sprintf(" %d: ", line) + err.Error())
+			return true
+		}
+		// The insert information has a duplicate primary key.
+		pat = regexp.MustCompile("Error 1062")
+		if res := pat.FindString(err.Error()); len(res) != 0 {
+			w.WriteHeader(500)
+			msg, _ = json.Marshal(ErrorMsg{Msg: "该条信息已经存在"})
+			w.Write(msg)
+			Log.Println(fname + fmt.Sprintf(" %d: ", line) + err.Error())
+			return true
+		}
+		// Other errors, regard all of them as exception.
 		w.WriteHeader(500)
 		msg, _ = json.Marshal(ErrorMsg{Msg: "服务器内部错误"})
 		w.Write(msg)
 		Log.SetPrefix("[Exception]")
-		Log.Println(err.Error())
+		Log.Println(fname + fmt.Sprintf(" %d: ", line) + err.Error())
 		Log.SetPrefix("[Error]")
 		return true
 	}
@@ -88,7 +97,7 @@ func SqlError(err error, w http.ResponseWriter, hasResult bool) bool {
 		w.WriteHeader(404)
 		msg, _ = json.Marshal(ErrorMsg{Msg: "您查询的信息不存在"})
 		w.Write(msg)
-		Log.Println("The query result is empty.")
+		Log.Println(fname + fmt.Sprintf(" %d: ", line) + "The query result is empty.")
 		return true
 	}
 
@@ -103,7 +112,13 @@ func SqlError(err error, w http.ResponseWriter, hasResult bool) bool {
 func NormalError(err error, arg ...interface{}) bool {
 	if err != nil {
 		//panic(err)
-		Log.Println(err.Error())
+		// Get the file who calls the function.
+		_, file, line, _ := runtime.Caller(1)
+		pathArray := strings.Split(file, "/")
+		fname := pathArray[len(pathArray)-1]
+
+		Log.Println(fname + fmt.Sprintf(" %d: ", line) + err.Error())
+
 		if len(arg) != 0 {
 			w := arg[0].(http.ResponseWriter)
 			w.WriteHeader(500)

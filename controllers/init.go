@@ -120,13 +120,14 @@ func initRes() {
 	res = services.ReservationService.NewReservation("预定失败", start, end, 1, "生日party",
 		approvalNote, 15331125, 10331124, 1, 2)
 	services.ReservationService.SaveAInfo(res)
+
 }
 
-// func init() {
-// 	initStudent()
-// 	initAdmin()
-// 	initApprover()
-// 	initClassroom()
-// 	initDep()
-// 	initRes()
-// }
+func init() {
+	initStudent()
+	initAdmin()
+	initApprover()
+	initClassroom()
+	initDep()
+	initRes()
+}

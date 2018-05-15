@@ -118,11 +118,11 @@ func (*ReservationInfoService) GetReservationBySomeCond(classroomId int, arg ...
 		break
 	case 1:
 		err = entities.SlaveEngine.Where("classroom_id = ? AND (start_time > ? OR  end_time < ?)",
-			classroomId, arg[0], arg[0]).Find(&reservations)
+			classroomId, arg[0].(time.Time), arg[0].(time.Time)).Find(&reservations)
 		break
 	default:
 		err = entities.SlaveEngine.Where("classroom_id = ? AND (start_time > ? OR  end_time < ?)",
-			classroomId, arg[1], arg[0]).Find(&reservations)
+			classroomId, arg[1].(time.Time), arg[0].(time.Time)).Find(&reservations)
 	}
 
 	return reservations, err

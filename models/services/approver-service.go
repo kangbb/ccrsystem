@@ -45,7 +45,7 @@ func (*ApproverInfoService) FindInfoById(id int) (*entities.ApproverInfo, error)
  */
 func (*ApproverInfoService) FindInfoByDepartmentId(departmentId int) ([]entities.ApproverInfo, error) {
 	approver := make([]entities.ApproverInfo, 0)
-	err := entities.SlaveEngine.Where("department_id = ?", departmentId).Find(approver)
+	err := entities.SlaveEngine.Where("department_id = ?", departmentId).Find(&approver)
 
 	return approver, err
 }

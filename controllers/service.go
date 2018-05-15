@@ -49,7 +49,8 @@ func signin(userType string, w http.ResponseWriter, r *http.Request) {
 	}
 
 	// The format of the id and password are wrong.
-	if !UserIfoFormatValidate(js.Get(userType+"Id").MustString(), js.Get(userType+"Pwd").MustString(), w) {
+	stringId := fmt.Sprintf("%d", js.Get(userType+"Id").MustInt())
+	if !UserIfoFormatValidate(stringId, js.Get(userType+"Pwd").MustString(), w) {
 		return
 	}
 
@@ -89,7 +90,7 @@ func signin(userType string, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if middlwares.SessionProcess(w, r, js.Get(userType+"Id").MustInt(), userType, name) {
+	if middlewares.SessionProcess(w, r, stringId, userType, name) {
 		w.WriteHeader(200)
 	}
 }
@@ -99,7 +100,7 @@ func signin(userType string, w http.ResponseWriter, r *http.Request) {
 * Just delete the sessions.
  */
 func signout(w http.ResponseWriter, r *http.Request) {
-	if !middlwares.SessionProcess(w, r) {
+	if !middlewares.SessionProcess(w, r) {
 		return
 	}
 	req, _ := http.NewRequest("GET", "/", r.Body)
@@ -162,17 +163,15 @@ func updateUserInfo(userType string, w http.ResponseWriter, r *http.Request) {
 
 	var id int
 	id, _ = strconv.Atoi(r.Header.Get("userId"))
+	pwd := encryptPwd(id, js.Get(userType+"Pwd").MustString())
 	switch userType {
 	case "Student":
-		pwd := encryptPwd(id, js.Get("StudentPwd").MustString())
 		err = services.StudentService.UpdateInfo(id, pwd)
 		break
 	case "Approver":
-		pwd := encryptPwd(id, js.Get("ApproverPwd").MustString())
 		err = services.ApproverService.UpdatePasswordInfo(id, pwd)
 		break
 	case "Admin":
-		pwd := encryptPwd(id, js.Get("AdminPwd").MustString())
 		err = services.AdminService.UpdateInfo(id, pwd)
 		break
 	default:
@@ -329,17 +328,15 @@ func updateUserById(userType string, w http.ResponseWriter, r *http.Request) {
 	}
 
 	id := getIdFromPath(r)
+	pwd := encryptPwd(id, js.Get(userType+"Pwd").MustString())
 	switch userType {
 	case "Student":
-		pwd := js.Get("StudentPwd").MustString()
 		err = services.StudentService.UpdateInfo(id, pwd)
 		break
 	case "Approver":
-		pwd := js.Get("ApproverPwd").MustString()
 		err = services.ApproverService.UpdatePasswordInfo(id, pwd)
 		break
 	case "Admin":
-		pwd := js.Get("AdminPwd").MustString()
 		err = services.AdminService.UpdateInfo(id, pwd)
 		break
 	default:
@@ -487,13 +484,18 @@ func queryClassroom(w http.ResponseWriter, r *http.Request) {
 	case 2:
 		classrooms, err = services.ClassroomService.GetClassroomBySomeCond(classroomInfo[0],
 			classroomInfo[1], classroomInfo[2])
+		break
+	default:
+		logs.NormalError(logs.SWITCH_BRANCH_ERROR, w)
 	}
 
 	if logs.SqlError(err, w, len(classrooms) != 0) {
 		return
 	}
 
-	result := make([]queryResult, 0)
+	// Can't be 0 in make
+	// If do, then will result in error: index out of range
+	result := make([]queryResult, len(classrooms))
 	for k, v := range classrooms {
 		result[k] = queryResult{
 			ClassroomId:       v.ClassroomId,
@@ -518,11 +520,17 @@ func queryClassroom(w http.ResponseWriter, r *http.Request) {
 		switch index {
 		case -1:
 			res, err = services.ReservationService.GetReservationBySomeCond(v.ClassroomId, time.Now())
+			break
 		case 0:
 			res, err = services.ReservationService.GetReservationBySomeCond(v.ClassroomId, lessonToTime(resInfo[0].(string)))
+			break
 		case 1:
 			res, err = services.ReservationService.GetReservationBySomeCond(v.ClassroomId, lessonToTime(resInfo[0].(string)),
 				lessonToTime(resInfo[1].(string)))
+			break
+		default:
+			logs.NormalError(logs.SWITCH_BRANCH_ERROR, w)
+			return
 		}
 		if logs.SqlError(err, w, true) {
 			return
@@ -581,7 +589,7 @@ func updateClassroomById(w http.ResponseWriter, r *http.Request) {
 	num := js.Get("ClassroomNum").MustString()
 	building := js.Get("ClassroomBuilding").MustString()
 	campus := js.Get("ClassroomCampus").MustString()
-	err = services.ClassroomService.UpdateInfo(id, cap, num, building, campus)
+	err = services.ClassroomService.UpdateInfo(id, campus, building, num, cap)
 
 	if logs.SqlError(err, w, true) {
 		return
@@ -669,6 +677,8 @@ func getResById(w http.ResponseWriter, r *http.Request) {
 
 /*
 * Update reservation by id
+* For student, only can update reservation reason.
+* For approver, only can update reservation state, approvalNote.
  */
 func updateResById(w http.ResponseWriter, r *http.Request) {
 	var (
@@ -804,11 +814,12 @@ func getStudentResList(w http.ResponseWriter, r *http.Request) {
 	}
 	var userId int
 	userId, _ = strconv.Atoi(r.Header.Get("userId"))
-	result := make([]Reservation, 0)
 	reservations, err := services.ReservationService.FindInfoByStudentId(userId)
 	if logs.SqlError(err, w, len(reservations) != 0) {
 		return
 	}
+
+	result := make([]Reservation, len(reservations))
 	for k, v := range reservations {
 		result[k] = Reservation{
 			ResId:        v.ResId,
@@ -845,7 +856,6 @@ func getApproverResList(w http.ResponseWriter, r *http.Request) {
 		ApproverId   int
 		ClassroomId  int
 	}
-	result := make([]Reservation, 0)
 
 	var userId int
 	userId, _ = strconv.Atoi(r.Header.Get("userId"))
@@ -854,6 +864,8 @@ func getApproverResList(w http.ResponseWriter, r *http.Request) {
 	if logs.SqlError(err, w, len(reservations) != 0) {
 		return
 	}
+
+	result := make([]Reservation, len(reservations))
 	for k, v := range reservations {
 		if v.ResState == "预定失败" {
 			continue
@@ -927,7 +939,7 @@ func addRes(w http.ResponseWriter, r *http.Request) {
 		classroomId = tmp
 	} else {
 		w.WriteHeader(500)
-		data, _ = json.Marshal(logs.ErrorMsg{Msg: "申请原因不能为空"})
+		data, _ = json.Marshal(logs.ErrorMsg{Msg: "申请教室不能为空"})
 		w.Write(data)
 		return
 	}
@@ -1280,7 +1292,7 @@ func deleteOrganizationById(w http.ResponseWriter, r *http.Request) {
 /***********************************SOME SUBFUNCTION*******************************/
 func lessonToTime(lessonTime string) time.Time {
 	mappingRegular := map[string]int{
-		"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9, "十": 1,
+		"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9, "十": 10,
 	}
 	var lesson int
 	reg := regexp.MustCompile(`[0-9\-]+`)
@@ -1292,20 +1304,23 @@ func lessonToTime(lessonTime string) time.Time {
 		lesson = mappingRegular[string(hanstr[1])]
 		break
 	case 5:
-		lesson = mappingRegular[string(hanstr[1])]*10 + mappingRegular[string(hanstr[2])]
+		lesson = mappingRegular[string(hanstr[1])] + mappingRegular[string(hanstr[2])]
 		break
 	}
-	startTime, _ := time.Parse("2006-01-02 15:04:05", date+" "+"08:00:00")
+	//The database store time as CST
+	//So we need parse time in Location.
+	loc, _ := time.LoadLocation("Local")
+	startTime, _ := time.ParseInLocation("2006-01-02 15:04:05", date+" "+"08:00:00", loc)
 	duraTime := strconv.Itoa((lesson-1)*(45+10)) + "m"
 	addTime, _ := time.ParseDuration(duraTime)
 	return startTime.Add(addTime)
 }
-
 func timeToLesson(trueTime time.Time) string {
 	mappingRegular := []string{"一", "二", "三", "四", "五", "六", "七", "八", "九", "十"}
 	var lesson string
 	date := trueTime.Format("2006-01-02")
-	startTime, _ := time.Parse("2006-01-02 15:04:05", date+" "+"08:00:00")
+	loc, _ := time.LoadLocation("Local")
+	startTime, _ := time.ParseInLocation("2006-01-02 15:04:05", date+" "+"08:00:00", loc)
 	lessonInNum := int(trueTime.Sub(startTime).Minutes())/55 + 1
 	if lessonInNum > 10 {
 		lesson = mappingRegular[9] + mappingRegular[lessonInNum%10-1]
@@ -1316,7 +1331,6 @@ func timeToLesson(trueTime time.Time) string {
 	}
 
 	return date + " " + "第" + lesson + "节"
-
 }
 
 func encryptPwd(id int, pwd string) string {

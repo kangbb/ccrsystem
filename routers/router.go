@@ -1,4 +1,4 @@
-package controller
+package routers
 
 import (
 	"net/http"
@@ -6,13 +6,14 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/kangbb/ccrsystem/controllers"
+	"github.com/kangbb/ccrsystem/middlewares"
 )
 
 /*
 * Get routers. The function return a router list to the main.go
 * It registes some routers which used to process business request.
  */
-func GetRouters() *mux.Route {
+func GetRouters() *mux.Router {
 
 	r := mux.NewRouter()
 	// Load static template
