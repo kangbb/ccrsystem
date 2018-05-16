@@ -57,8 +57,9 @@ func CorsHandler(next http.Handler) http.Handler {
 func Authentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Some url needn't to validate the session
-		var matched, _ = regexp.MatchString(".*signin", r.URL.Path)
-		if r.URL.Path == "/" || matched {
+		match_signin, _ := regexp.MatchString(".*signin", r.URL.Path)
+		match_static, _ := regexp.MatchString("^/static.*", r.URL.Path)
+		if r.URL.Path == "/" || match_signin || match_static {
 			next.ServeHTTP(w, r)
 			return
 		}
