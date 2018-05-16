@@ -8,7 +8,7 @@ import Query from '@/components/student/query'
 import Classroom from '@/components/student/classroom'
 import Reservation from '@/components/student/reservation'
 import NotApprove from '@/components/approver/notApprove'
-import HasApprove from '@/components/approver/HasApprove'
+import HasApprove from '@/components/approver/hasApprove'
 
 Vue.use(Router)
 
