@@ -1,5 +1,7 @@
 # class-reservation
 
+![test](https://www.travis-ci.org/kangbb/ccrsystem.svg?branch=master)
+
 一个简单的校园课室预定系统。采用前后端分离的方式开发，前端采用`vuex`框架，后端采用`golang`编写。
 
 ## 文档
