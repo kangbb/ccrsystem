@@ -10,7 +10,7 @@ API使用`showdoc`进行管理，地址如下：
 
 [https://www.showdoc.cc/web/#/69795491818399](https://www.showdoc.cc/web/#/69795491818399)
 
-【密码】：123456
+<font color="#0366d6">密码：123456</font>
 
 ### 数据字典
 
@@ -18,7 +18,7 @@ API使用`showdoc`进行管理，地址如下：
 
 [https://www.showdoc.cc/web/#/69795491818399](https://www.showdoc.cc/web/#/69795491818399)
 
-【密码】：123456
+<font color="#0366d6">密码：123456</font>
 
 ## 后端
 
