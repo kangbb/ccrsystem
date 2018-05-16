@@ -33,8 +33,6 @@ func CorsHandler(next http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 
-		w.Header().Set("Content-Type", "application/json")
-
 		//not-so-simple request will initiate(发起) a preflight request("预检"请求) before the formal request
 		//such as PUT, DELETE, and the vaule of Content-Type is application/json.
 		if r.Method == "OPTIONS" {

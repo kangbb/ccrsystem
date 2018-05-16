@@ -47,6 +47,10 @@ $ npm run dev
 ```
 $ npm build .
 ```
+静态文件部署测试
+```
+$ node server.js
+```
 
 ## 遇到的问题及解决
 
