@@ -24,7 +24,7 @@ import (
 func renderFile(name string, w http.ResponseWriter, r *http.Request) {
 	filepath := "views/" + name + ".html"
 	t := template.Must(template.ParseFiles(filepath))
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Content-Type", "text/html; charset=UTF-8")
 	w.WriteHeader(200)
 	t.Execute(w, nil)
 }
