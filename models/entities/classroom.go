@@ -8,7 +8,7 @@ type ClassroomInfo struct {
 	ClassroomCampus   string
 	ClassroomBuilding string
 	ClassroomNum      string
-	Capicity          int
+	Capacity          int
 }
 
 func (u ClassroomInfo) TableName() string {

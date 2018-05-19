@@ -422,7 +422,7 @@ func addClassroom(w http.ResponseWriter, r *http.Request) {
 	classroomCampus := js.Get("ClassroomCampus").MustString()
 	classroomBuilding := js.Get("ClassroomBuilding").MustString()
 	classroomNum := js.Get("ClassroomNum").MustString()
-	cap := js.Get("Capicity").MustInt()
+	cap := js.Get("Capacity").MustInt()
 	if classroomCampus == "" || classroomBuilding == "" || classroomNum == "" || cap == 0 {
 		w.WriteHeader(500)
 		data, _ := json.Marshal(logs.ErrorMsg{Msg: "必填项不能为空"})
@@ -455,7 +455,7 @@ func queryClassroom(w http.ResponseWriter, r *http.Request) {
 		ClassroomId       int
 		ClassroomCampus   string
 		ClassroomBuilding string
-		Capicity          int
+		Capacity          int
 		Res               map[int]reservation
 	}
 
@@ -470,7 +470,7 @@ func queryClassroom(w http.ResponseWriter, r *http.Request) {
 	classroomInfo := make(map[int]interface{})
 	classroomInfo[0] = js.Get("ClassroomCampus").MustString()
 	classroomInfo[1] = js.Get("ClassroomBuilding").MustString()
-	if tmp := js.Get("Capicity").MustInt(); tmp != 0 {
+	if tmp := js.Get("Capacity").MustInt(); tmp != 0 {
 		index += 1
 		classroomInfo[index] = tmp
 	}
@@ -502,7 +502,7 @@ func queryClassroom(w http.ResponseWriter, r *http.Request) {
 			ClassroomId:       v.ClassroomId,
 			ClassroomCampus:   v.ClassroomCampus,
 			ClassroomBuilding: v.ClassroomBuilding,
-			Capicity:          v.Capicity,
+			Capacity:          v.Capacity,
 			Res:               make(map[int]reservation),
 		}
 		index = -1
@@ -586,7 +586,7 @@ func updateClassroomById(w http.ResponseWriter, r *http.Request) {
 	//default return all the parameter for the classroom
 	//include the parameters which don't need to update
 	id := getIdFromPath(r)
-	cap := js.Get("Capicity").MustInt()
+	cap := js.Get("Capacity").MustInt()
 	num := js.Get("ClassroomNum").MustString()
 	building := js.Get("ClassroomBuilding").MustString()
 	campus := js.Get("ClassroomCampus").MustString()

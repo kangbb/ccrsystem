@@ -14,7 +14,7 @@ func (*ClassroomInfoService) NewClassroom(campuse string, building string, num s
 		ClassroomCampus:   campuse,
 		ClassroomBuilding: building,
 		ClassroomNum:      num,
-		Capicity:          cap,
+		Capacity:          cap,
 	}
 	return classroom
 }
@@ -52,7 +52,7 @@ func (*ClassroomInfoService) UpdateInfo(id int, arg ...interface{}) error {
 	classroom := new(entities.ClassroomInfo)
 	switch len(arg) {
 	case 4:
-		classroom.Capicity = arg[3].(int)
+		classroom.Capacity = arg[3].(int)
 	case 3:
 		classroom.ClassroomNum = arg[2].(string)
 	case 2:
@@ -88,7 +88,7 @@ func (*ClassroomInfoService) GetClassroomBySomeCond(arg ...interface{}) ([]entit
 			arg[1]).Find(&classrooms)
 		break
 	case 3:
-		err = entities.SlaveEngine.Where("classroom_campus = ? AND  classroom_building = ? and capicity > ?", arg[0],
+		err = entities.SlaveEngine.Where("classroom_campus = ? AND  classroom_building = ? and capacity > ?", arg[0],
 			arg[1], arg[2]).Find(&classrooms)
 	}
 
