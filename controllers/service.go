@@ -564,7 +564,7 @@ func queryClassroom(w http.ResponseWriter, r *http.Request) {
 	building := js.Get("ClassroomBuilding").MustString()
 	capacity := js.Get("Capacity").MustInt()
 	if campuse == "" || building == "" || capacity == 0 {
-		logs.RequestError(500, logs.ErrorMsg{"必填项不能为空"}, w)
+		logs.RequestError(500, logs.ErrorMsg{Msg: "必填项不能为空"}, w)
 		return
 	}
 	//query classrooms which meet the require
@@ -635,7 +635,7 @@ func updateClassroomById(w http.ResponseWriter, r *http.Request) {
 	building := js.Get("ClassroomBuilding").MustString()
 	campus := js.Get("ClassroomCampus").MustString()
 	if cap == 0 || num == "" || building == "" || campus == "" {
-		logs.RequestError(500, logs.ErrorMsg{"必填字段不能为空"}, w)
+		logs.RequestError(500, logs.ErrorMsg{Msg: "必填字段不能为空"}, w)
 		return
 	}
 	err = services.ClassroomService.UpdateInfo(id, campus, building, num, cap)
@@ -754,7 +754,7 @@ func updateResById(w http.ResponseWriter, r *http.Request) {
 		reason := js.Get("ResReason").MustString()
 		organizationName := js.Get("OrganizationName").MustString()
 		if reason == "" || organizationName == "" {
-			logs.RequestError(500, logs.ErrorMsg{"必填项不能为空"}, w)
+			logs.RequestError(500, logs.ErrorMsg{Msg: "必填项不能为空"}, w)
 			return
 		}
 
@@ -961,7 +961,7 @@ func addRes(w http.ResponseWriter, r *http.Request) {
 	classroomId := js.Get("ClassroomId").MustInt()
 	organizationName := js.Get("OrganizationName").MustString()
 	if start_time == "" || end_time == "" || reason == "" || classroomId == 0 || organizationName == "" {
-		logs.RequestError(500, logs.ErrorMsg{"必填项不能为空"}, w)
+		logs.RequestError(500, logs.ErrorMsg{Msg: "必填项不能为空"}, w)
 		return
 	}
 	start := lessonToTime(start_time)
@@ -1097,7 +1097,7 @@ func updateDepartmentById(w http.ResponseWriter, r *http.Request) {
 	intro := js.Get("Introduction").MustString()
 	order := js.Get("Order").MustInt()
 	if name == "" || intro == "" || order == 0 {
-		logs.RequestError(500, logs.ErrorMsg{"必填字段不能为空"}, w)
+		logs.RequestError(500, logs.ErrorMsg{Msg: "必填字段不能为空"}, w)
 		return
 	}
 
