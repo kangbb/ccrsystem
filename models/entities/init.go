@@ -28,7 +28,7 @@ func init() {
 	}
 
 	err = MasterEngine.Sync2(new(StudentInfo), new(AdminInfo), new(ApproverInfo), new(ClassroomInfo),
-		new(ReservationInfo), new(DepartmentInfo), new(OrganizationInfo))
+		new(ReservationInfo), new(DepartmentInfo))
 	if err != nil {
 		panic(err)
 	}

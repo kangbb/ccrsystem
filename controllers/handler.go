@@ -273,38 +273,6 @@ func DeleteDepartmentById(w http.ResponseWriter, r *http.Request) {
 	deleteDepartmentById(w, r)
 }
 
-//data interface for organization
-func GetOrganizationList(w http.ResponseWriter, r *http.Request) {
-	if !validatePerm([]string{"Admin"}, false, w, r) {
-		return
-	}
-	getOrganizationList(w, r)
-}
-func AddOrganization(w http.ResponseWriter, r *http.Request) {
-	if !validatePerm([]string{"Admin"}, false, w, r) {
-		return
-	}
-	addOrganization(w, r)
-}
-func GetOrganizationById(w http.ResponseWriter, r *http.Request) {
-	if !validatePerm([]string{"Admin", "Student"}, false, w, r) {
-		return
-	}
-	getOrganizationById(w, r)
-}
-func UpdateOrganizationById(w http.ResponseWriter, r *http.Request) {
-	if !validatePerm([]string{"Admin"}, false, w, r) {
-		return
-	}
-	updateOrganizationById(w, r)
-}
-func DeleteOrganizationById(w http.ResponseWriter, r *http.Request) {
-	if !validatePerm([]string{"Admin"}, false, w, r) {
-		return
-	}
-	deleteOrganizationById(w, r)
-}
-
 /***********************************SOME SUBFUNCTION*******************************/
 func validatePerm(userType []string, isNeedValidateId bool, w http.ResponseWriter, r *http.Request) bool {
 	if isNeedValidateId {

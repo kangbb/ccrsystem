@@ -1,0 +1,23 @@
+version: "3"
+services:
+  ccrsystem:
+    image: image/ccrsystem:latest
+    container_name: ccrsystem
+    ports:
+      - "8080:8080" 
+    volumes:
+      - $HOME/Work/data/ccrsystem-data:/ccrSystem/data
+    privileged: true  
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1000k"
+        max-file: "20"
+    external_links:
+      - dbmaster
+      - dbslave
+    networks:
+      - mysql_app
+networks:
+  mysql_app:
+    external: true

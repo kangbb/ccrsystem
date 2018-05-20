@@ -22,6 +22,13 @@ API使用`showdoc`进行管理，地址如下：
 
 <font color="#0366d6">密码：123456</font>
 
+### 技术文档
+
+描述了数据库设计相关内容。
+[https://www.showdoc.cc/web/#/69795491818399](https://www.showdoc.cc/web/#/69795491818399)
+
+<font color="#0366d6">密码：123456</font>
+
 ## 后端
 
 后端采用golang开发，如果需要本地化测试，可以按照`testconfig`文件夹下的`README.md`文档进行配置，测试。

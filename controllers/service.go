@@ -20,6 +20,21 @@ import (
 	"github.com/kangbb/ccrsystem/models/services"
 )
 
+type Reservation struct {
+	ResId            int
+	ResReason        string
+	StartTime        string
+	EndTime          string
+	StudentId        int
+	ClassroomId      int
+	ClassroomNum     string
+	Capacity         int
+	OrganizationName string
+	ApproverId       int
+	ResState         int
+	ApprovalNote     string
+}
+
 /******************************** Render File *************************/
 func renderFile(name string, w http.ResponseWriter, r *http.Request) {
 	filepath := "views/" + name + ".html"
@@ -249,13 +264,18 @@ func addUser(userType string, w http.ResponseWriter, r *http.Request) {
 	pwd := encryptPwd(id, js.Get(userType+"Pwd").MustString())
 	switch userType {
 	case "Student":
-		user := services.StudentService.NewStudent(id, pwd, js.Get("StudentName").MustString(),
-			js.Get("OrganizationId").MustInt())
+		user := services.StudentService.NewStudent(id, pwd, js.Get("StudentName").MustString())
 		err = services.StudentService.SaveAInfo(user)
 		break
 	case "Approver":
+		// Validating whether departmentId is exiting.
+		departmentId := js.Get("DepartmentId").MustInt()
+		dep, err := services.DepartmentService.FindInfoById(departmentId)
+		if logs.SqlError(err, w, dep.DepartmentName != "") {
+			return
+		}
 		user := services.ApproverService.NewApprover(id, pwd, js.Get("ApproverName").MustString(),
-			js.Get("DepartmentId").MustInt())
+			departmentId)
 		err = services.ApproverService.SaveAInfo(user)
 		break
 	case "Admin":
@@ -365,9 +385,97 @@ func deleteUserById(userType string, w http.ResponseWriter, r *http.Request) {
 	switch userType {
 	case "Student":
 		err = services.StudentService.DeleteInfo(id)
+		if logs.SqlError(err, w, true) {
+			return
+		}
+
+		// Delete the reservations related.
+		reservations, err := services.ReservationService.FindInfoByStudentId(id)
+		if logs.SqlError(err, w, true) {
+			return
+		}
+		for _, v := range reservations {
+			err = services.ReservationService.DeleteInfo(v.ResId)
+			if logs.SqlError(err, w, true) {
+				return
+			}
+		}
 		break
 	case "Approver":
+		approver, err := services.ApproverService.FindInfoById(id)
+		if logs.SqlError(err, w, approver.ApproverName != "") {
+			return
+		}
+		//Delete the approver
 		err = services.ApproverService.DeleteInfo(id)
+
+		//Get the approvers who are in the same department
+		approvers, err := services.ApproverService.FindInfoByDepartmentId(approver.DepartmentId)
+		if logs.SqlError(err, w, true) {
+			return
+		}
+		// No approver in this department, then delete the department.
+		if len(approvers) == 0 {
+			del_dep, err := services.DepartmentService.FindInfoById(approver.DepartmentId)
+			if logs.SqlError(err, w, del_dep.DepartmentName != "") {
+				return
+			}
+			err = services.DepartmentService.DeleteInfo(id)
+			if logs.SqlError(err, w, true) {
+				return
+			}
+
+			// Update order
+			departments, err := services.DepartmentService.FindAllInfo()
+			if logs.SqlError(err, w, len(departments) != 0) {
+				return
+			}
+			order := del_dep.Order
+			for _, v := range departments {
+				if v.Order > order {
+					err = services.DepartmentService.UpdateInfo(v.DepartmentId, v.DepartmentName, v.Introduction, v.Order-1,
+						v.Note)
+					if logs.SqlError(err, w, true) {
+						return
+					}
+				}
+			}
+
+			// Update reservation
+			//Define some variable for updating reservatons
+			new_dep, err := services.DepartmentService.FindInfoByOrder(del_dep.Order)
+			if logs.SqlError(err, w, new_dep.DepartmentName != "") {
+				return
+			}
+			new_approvers, err := services.ApproverService.FindInfoByDepartmentId(new_dep.DepartmentId)
+			if logs.SqlError(err, w, len(new_approvers) != 0) {
+				return
+			}
+			reservations, err := services.ReservationService.FindInfoByApproverId(id)
+			if logs.SqlError(err, w, true) {
+				return
+			}
+			for _, res := range reservations {
+				res.ApproverId = approvers[rand.Intn(len(new_approvers))].ApproverId
+				err := services.ReservationService.UpdateInfo(res.ResId, res.ResReason, res.OrganizationName, res.ResState, res.ApprovalNote, res.ApproverId)
+				if logs.SqlError(err, w, true) {
+					return
+				}
+			}
+		} else {
+			// Has approvers in this department, then delete the department.
+			reservations, err := services.ReservationService.FindInfoByApproverId(id)
+			if logs.SqlError(err, w, true) {
+				return
+			}
+			for _, res := range reservations {
+				res.ApproverId = approvers[rand.Intn(len(approvers))].ApproverId
+				err := services.ReservationService.UpdateInfo(res.ResId, res.ResReason, res.OrganizationName, res.ResState, res.ApprovalNote, res.ApproverId)
+				if logs.SqlError(err, w, true) {
+					return
+				}
+			}
+		}
 		break
 	case "Admin":
 		//admin can't delete count which belongs to himself
@@ -444,20 +552,6 @@ func addClassroom(w http.ResponseWriter, r *http.Request) {
 * Accessed for all users, which are student, approver, admin
  */
 func queryClassroom(w http.ResponseWriter, r *http.Request) {
-	type reservation struct {
-		ResId     int
-		StartTime string
-		EndTime   string
-		ResState  string
-		ResReason string
-	}
-	type queryResult struct {
-		ClassroomId       int
-		ClassroomCampus   string
-		ClassroomBuilding string
-		Capacity          int
-		Res               map[int]reservation
-	}
 
 	//default use the parameter from r.body
 	defer r.Body.Close()
@@ -466,85 +560,35 @@ func queryClassroom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	index := 1
-	classroomInfo := make(map[int]interface{})
-	classroomInfo[0] = js.Get("ClassroomCampus").MustString()
-	classroomInfo[1] = js.Get("ClassroomBuilding").MustString()
-	if tmp := js.Get("Capacity").MustInt(); tmp != 0 {
-		index += 1
-		classroomInfo[index] = tmp
+	campuse := js.Get("ClassroomCampus").MustString()
+	building := js.Get("ClassroomBuilding").MustString()
+	capacity := js.Get("Capacity").MustInt()
+	if campuse == "" || building == "" || capacity == 0 {
+		logs.RequestError(500, logs.ErrorMsg{"必填项不能为空"}, w)
+		return
 	}
-
 	//query classrooms which meet the require
-	classrooms := services.ClassroomService.NewClassroomSlice()
-	switch index {
-	case 1:
-		classrooms, err = services.ClassroomService.GetClassroomBySomeCond(classroomInfo[0],
-			classroomInfo[1])
-		break
-	case 2:
-		classrooms, err = services.ClassroomService.GetClassroomBySomeCond(classroomInfo[0],
-			classroomInfo[1], classroomInfo[2])
-		break
-	default:
-		logs.NormalError(logs.SWITCH_BRANCH_ERROR, w)
-	}
-
+	classrooms, err := services.ClassroomService.GetClassroomBySomeCond(campuse, building, capacity)
 	if logs.SqlError(err, w, len(classrooms) != 0) {
 		return
 	}
 
 	// Can't be 0 in make
 	// If do, then will result in error: index out of range
-	result := make([]queryResult, len(classrooms))
-	for k, v := range classrooms {
-		result[k] = queryResult{
-			ClassroomId:       v.ClassroomId,
-			ClassroomCampus:   v.ClassroomCampus,
-			ClassroomBuilding: v.ClassroomBuilding,
-			Capacity:          v.Capacity,
-			Res:               make(map[int]reservation),
-		}
-		index = -1
-		resInfo := make(map[int]interface{})
-		if tmp := js.Get("StartTime").MustString(); tmp != "" {
-			index += 1
-			resInfo[index] = lessonToTime(tmp)
-		}
-		if tmp := js.Get("EndTime").MustString(); tmp != "" {
-			index += 1
-			resInfo[index] = lessonToTime(tmp)
-		}
+	result := services.ClassroomService.NewClassroomSlice()
+	for _, v := range classrooms {
+		start := lessonToTime(js.Get("StartTime").MustString())
+		end := lessonToTime(js.Get("EndTime").MustString())
 
 		//query the state of the each classroom
-		res := services.ReservationService.NewReservationSlice()
-		switch index {
-		case -1:
-			res, err = services.ReservationService.GetReservationBySomeCond(v.ClassroomId, time.Now())
-			break
-		case 0:
-			res, err = services.ReservationService.GetReservationBySomeCond(v.ClassroomId, lessonToTime(resInfo[0].(string)))
-			break
-		case 1:
-			res, err = services.ReservationService.GetReservationBySomeCond(v.ClassroomId, lessonToTime(resInfo[0].(string)),
-				lessonToTime(resInfo[1].(string)))
-			break
-		default:
-			logs.NormalError(logs.SWITCH_BRANCH_ERROR, w)
-			return
-		}
+		res, err := services.ReservationService.GetReservationBySomeCond(v.ClassroomId, start, end)
 		if logs.SqlError(err, w, true) {
 			return
 		}
 
-		for i, val := range res {
-			result[k].Res[i] = reservation{
-				ResId:     val.ResId,
-				StartTime: timeToLesson(val.StartTime),
-				EndTime:   timeToLesson(val.EndTime),
-				ResState:  val.ResState,
-				ResReason: val.ResReason,
-			}
+		// If no reservation for the classroom, then the classrrom is idle.
+		if len(res) == 0 {
+			result = append(result, v)
 		}
 	}
 
@@ -590,6 +634,10 @@ func updateClassroomById(w http.ResponseWriter, r *http.Request) {
 	num := js.Get("ClassroomNum").MustString()
 	building := js.Get("ClassroomBuilding").MustString()
 	campus := js.Get("ClassroomCampus").MustString()
+	if cap == 0 || num == "" || building == "" || campus == "" {
+		logs.RequestError(500, logs.ErrorMsg{"必填字段不能为空"}, w)
+		return
+	}
 	err = services.ClassroomService.UpdateInfo(id, campus, building, num, cap)
 
 	if logs.SqlError(err, w, true) {
@@ -610,9 +658,20 @@ func deleteClassroomById(w http.ResponseWriter, r *http.Request) {
 
 	if logs.SqlError(err, w, true) {
 		return
-	} else {
-		w.WriteHeader(200)
 	}
+	// Delete the reservations related.
+	reservations, err := services.ReservationService.FindInfoByClassroomId(id)
+	if logs.SqlError(err, w, true) {
+		return
+	}
+	for _, v := range reservations {
+		err = services.ReservationService.DeleteInfo(v.ResId)
+		if logs.SqlError(err, w, true) {
+			return
+		}
+	}
+
+	w.WriteHeader(200)
 }
 
 /************************* Data Interface For Reservation ***********************/
@@ -620,18 +679,6 @@ func deleteClassroomById(w http.ResponseWriter, r *http.Request) {
 * Get reservation by id
  */
 func getResById(w http.ResponseWriter, r *http.Request) {
-	type Reservation struct {
-		ResId        int
-		ResState     string
-		StartTime    string
-		EndTime      string
-		ResReason    string
-		ApprovalNote string
-		DepartmentId int
-		StudentId    int
-		ApproverId   int
-		ClassroomId  int
-	}
 	//default use the parameter from r.body
 	id := getIdFromPath(r)
 	res, err := services.ReservationService.FindInfoById(id)
@@ -642,33 +689,36 @@ func getResById(w http.ResponseWriter, r *http.Request) {
 	userType := r.Header.Get("userType")
 	var userId int
 	userId, _ = strconv.Atoi(r.Header.Get("userId"))
-	result := Reservation{}
 	// If the user have no permission accessed the reservation, return
 	if userType == "Student" && userId != res.StudentId ||
 		userType == "Approver" && userId != res.ApproverId {
-		w.WriteHeader(401)
-		data, _ := json.Marshal(logs.ErrorMsg{Msg: "Permission deny."})
-		w.Write(data)
+		logs.RequestError(401, logs.ErrorMsg{Msg: "Permission deny."}, w)
+		return
 	}
-	// need not to load the reservation ResState = "预定失败"
-	if userType == "Approver" && res.ResState == "预定失败" {
-		w.WriteHeader(404)
-		data, _ := json.Marshal(logs.ErrorMsg{Msg: "您查询的信息不存在."})
-		w.Write(data)
+	// need not to load the reservation ResState = 3 or 2
+	if userType == "Approver" && (res.ResState == 3 || res.ResState == 2) {
+		logs.RequestError(404, logs.ErrorMsg{Msg: "您查询的信息不存在."}, w)
 		return
 	}
 
-	result = Reservation{
-		ResId:        res.ResId,
-		ResState:     res.ResState,
-		StartTime:    timeToLesson(res.StartTime),
-		EndTime:      timeToLesson(res.EndTime),
-		ResReason:    res.ResReason,
-		ApprovalNote: res.ApprovalNote,
-		DepartmentId: res.DepartmentId,
-		StudentId:    res.StudentId,
-		ApproverId:   res.ApproverId,
-		ClassroomId:  res.ClassroomId,
+	classroom, err := services.ClassroomService.FindInfoById(res.ClassroomId)
+	if logs.SqlError(err, w, classroom.ClassroomNum != "") {
+		return
+	}
+
+	result := Reservation{
+		ResId:            res.ResId,
+		ResReason:        res.ResReason,
+		StartTime:        timeToLesson(res.StartTime),
+		EndTime:          timeToLesson(res.EndTime),
+		StudentId:        res.StudentId,
+		ClassroomId:      res.ClassroomId,
+		ClassroomNum:     classroom.ClassroomNum,
+		Capacity:         classroom.Capacity,
+		OrganizationName: res.OrganizationName,
+		ApproverId:       res.ApproverId,
+		ResState:         res.ResState,
+		ApprovalNote:     res.ApprovalNote,
 	}
 	data, _ := json.Marshal(result)
 
@@ -686,7 +736,7 @@ func updateResById(w http.ResponseWriter, r *http.Request) {
 		id           int
 		departmentId int
 		approverId   int
-		state        string
+		state        int
 		approvalNote string
 	)
 
@@ -701,28 +751,37 @@ func updateResById(w http.ResponseWriter, r *http.Request) {
 	userType := r.Header.Get("userType")
 	//student update reservation
 	if userType == "Student" {
-		var reason string
-		if tmp := js.Get("ResReason").MustString(); tmp != "" {
-			reason = tmp
-		} else {
-			w.WriteHeader(500)
-			w.Write([]byte("该项不能为空"))
-		}
-		department, err := services.DepartmentService.FindInfoByNote("initial")
-		if logs.SqlError(err, w, department.DepartmentName != "") {
+		reason := js.Get("ResReason").MustString()
+		organizationName := js.Get("OrganizationName").MustString()
+		if reason == "" || organizationName == "" {
+			logs.RequestError(500, logs.ErrorMsg{"必填项不能为空"}, w)
 			return
 		}
-		departmentId = department.DepartmentId
+
+		//If left departments more than one.
+		department, err := services.DepartmentService.FindInfoByNote("initial")
+		//If just left a department.
+		department_one, err_one := services.DepartmentService.FindInfoByNote("initial,final")
+		if logs.SqlError(err, w, department.DepartmentName != "") &&
+			logs.SqlError(err_one, w, department_one.DepartmentName != "") {
+			return
+		}
+		if department.DepartmentName != "" {
+			departmentId = department.DepartmentId
+		} else {
+			departmentId = department_one.DepartmentId
+		}
+
 		approvers, err := services.ApproverService.FindInfoByDepartmentId(departmentId)
 		if logs.SqlError(err, w, len(approvers) != 0) {
 			return
 		}
 		//random select a approver from the approvers who belong to the same department
 		approverId = approvers[rand.Intn(len(approvers))].ApproverId
-		state = "审批中"
+		state = 0
 		approvalNote = ""
-		err = services.ReservationService.UpdateInfo(id, approverId, departmentId,
-			approvalNote, state, reason)
+		err = services.ReservationService.UpdateInfo(id, reason, organizationName,
+			state, approvalNote, approverId)
 		if logs.SqlError(err, w, true) {
 			return
 		} //approver approve the reservation
@@ -734,24 +793,26 @@ func updateResById(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		//if exist, update resinfo
-		state = js.Get("ResState").MustString()
-		departmentId = js.Get("DepartmentId").MustInt()
-		approverId = js.Get("ApproverId").MustInt()
+		state = js.Get("ResState").MustInt()
 		approvalNote = js.Get("ApproverNote").MustString()
-		if state == "等待下一个部门审批" {
+
+		// Get the departmentId
+		approver, err := services.ApproverService.FindInfoById(res.ApproverId)
+		if logs.SqlError(err, w, approver.ApproverName != "") {
+			return
+		}
+		departmentId = approver.DepartmentId
+
+		if state == 2 {
 			department, err := services.DepartmentService.FindInfoById(departmentId)
 			if logs.SqlError(err, w, department.DepartmentName != "") {
 				return
 			}
 
 			if department.Note == "final" {
-				state = "预订成功"
+				state = 3
 			} else {
-				state = "审批中"
-				department, err := services.DepartmentService.FindInfoById(departmentId)
-				if logs.SqlError(err, w, department.DepartmentName != "") {
-					return
-				}
+				state = 1
 
 				department, err = services.DepartmentService.FindInfoByOrder(department.Order + 1)
 				if logs.SqlError(err, w, department.DepartmentName != "") {
@@ -767,12 +828,10 @@ func updateResById(w http.ResponseWriter, r *http.Request) {
 				approverId = approvers[rand.Intn(len(approvers))].ApproverId
 				approvalNote = ""
 			}
-		} else if state == "审批未通过" {
-			state = "预订失败"
 		}
 
-		err = services.ReservationService.UpdateInfo(id, approverId, departmentId,
-			approvalNote, state)
+		err = services.ReservationService.UpdateInfo(id, res.ResReason, res.OrganizationName,
+			state, approvalNote, approverId)
 
 		if logs.SqlError(err, w, true) {
 			return
@@ -801,18 +860,7 @@ func deleteResById(w http.ResponseWriter, r *http.Request) {
 * Get a student reservation list
  */
 func getStudentResList(w http.ResponseWriter, r *http.Request) {
-	type Reservation struct {
-		ResId        int
-		ResState     string
-		StartTime    string
-		EndTime      string
-		ResReason    string
-		ApprovalNote string
-		DepartmentId int
-		StudentId    int
-		ApproverId   int
-		ClassroomId  int
-	}
+
 	var userId int
 	userId, _ = strconv.Atoi(r.Header.Get("userId"))
 	reservations, err := services.ReservationService.FindInfoByStudentId(userId)
@@ -822,19 +870,27 @@ func getStudentResList(w http.ResponseWriter, r *http.Request) {
 
 	result := make([]Reservation, len(reservations))
 	for k, v := range reservations {
+		classroom, err := services.ClassroomService.FindInfoById(v.ClassroomId)
+		if logs.SqlError(err, w, classroom.ClassroomNum != "") {
+			return
+		}
+
 		result[k] = Reservation{
-			ResId:        v.ResId,
-			ResState:     v.ResState,
-			StartTime:    timeToLesson(v.StartTime),
-			EndTime:      timeToLesson(v.EndTime),
-			ResReason:    v.ResReason,
-			ApprovalNote: v.ApprovalNote,
-			DepartmentId: v.DepartmentId,
-			StudentId:    v.StudentId,
-			ApproverId:   v.ApproverId,
-			ClassroomId:  v.ClassroomId,
+			ResId:            v.ResId,
+			ResReason:        v.ResReason,
+			StartTime:        timeToLesson(v.StartTime),
+			EndTime:          timeToLesson(v.EndTime),
+			StudentId:        v.StudentId,
+			ClassroomId:      v.ClassroomId,
+			ClassroomNum:     classroom.ClassroomNum,
+			Capacity:         classroom.Capacity,
+			OrganizationName: v.OrganizationName,
+			ApproverId:       v.ApproverId,
+			ResState:         v.ResState,
+			ApprovalNote:     v.ApprovalNote,
 		}
 	}
+
 	data, _ := json.Marshal(result)
 
 	w.WriteHeader(200)
@@ -845,19 +901,6 @@ func getStudentResList(w http.ResponseWriter, r *http.Request) {
 * Get a approver reservation list
  */
 func getApproverResList(w http.ResponseWriter, r *http.Request) {
-	type Reservation struct {
-		ResId        int
-		ResState     string
-		StartTime    string
-		EndTime      string
-		ResReason    string
-		ApprovalNote string
-		DepartmentId int
-		StudentId    int
-		ApproverId   int
-		ClassroomId  int
-	}
-
 	var userId int
 	userId, _ = strconv.Atoi(r.Header.Get("userId"))
 
@@ -866,24 +909,31 @@ func getApproverResList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result := make([]Reservation, len(reservations))
-	for k, v := range reservations {
-		if v.ResState == "预定失败" {
+	result := make([]Reservation, 0)
+	for _, v := range reservations {
+		if v.ResState == 2 || v.ResState == 3 {
 			continue
 		}
-		result[k] = Reservation{
-			ResId:        v.ResId,
-			ResState:     v.ResState,
-			StartTime:    timeToLesson(v.StartTime),
-			EndTime:      timeToLesson(v.EndTime),
-			ResReason:    v.ResReason,
-			ApprovalNote: v.ApprovalNote,
-			DepartmentId: v.DepartmentId,
-			StudentId:    v.StudentId,
-			ApproverId:   v.ApproverId,
-			ClassroomId:  v.ClassroomId,
+		classroom, err := services.ClassroomService.FindInfoById(v.ClassroomId)
+		if logs.SqlError(err, w, classroom.ClassroomNum != "") {
+			return
 		}
+		result = append(result, Reservation{
+			ResId:            v.ResId,
+			ResReason:        v.ResReason,
+			StartTime:        timeToLesson(v.StartTime),
+			EndTime:          timeToLesson(v.EndTime),
+			StudentId:        v.StudentId,
+			ClassroomId:      v.ClassroomId,
+			ClassroomNum:     classroom.ClassroomNum,
+			Capacity:         classroom.Capacity,
+			OrganizationName: v.OrganizationName,
+			ApproverId:       v.ApproverId,
+			ResState:         v.ResState,
+			ApprovalNote:     v.ApprovalNote,
+		})
 	}
+
 	data, _ := json.Marshal(result)
 
 	w.WriteHeader(200)
@@ -892,15 +942,9 @@ func getApproverResList(w http.ResponseWriter, r *http.Request) {
 
 /*
 * Add a reservation to db
+* Just accessed for the student.
  */
 func addRes(w http.ResponseWriter, r *http.Request) {
-	var (
-		start       time.Time
-		end         time.Time
-		reason      string
-		classroomId int
-		data        []byte
-	)
 
 	//default use the parameter from r.body
 	defer r.Body.Close()
@@ -911,57 +955,28 @@ func addRes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	state := "审批中"
-	if tmp := js.Get("StartTime").MustString(); tmp != "" {
-		start = lessonToTime(tmp)
-	} else {
-		w.WriteHeader(500)
-		data, _ = json.Marshal(logs.ErrorMsg{Msg: "开始时间不能为空"})
-		w.Write(data)
+	start_time := js.Get("StartTime").MustString()
+	end_time := js.Get("EndTime").MustString()
+	reason := js.Get("ResReason").MustString()
+	classroomId := js.Get("ClassroomId").MustInt()
+	organizationName := js.Get("OrganizationName").MustString()
+	if start_time == "" || end_time == "" || reason == "" || classroomId == 0 || organizationName == "" {
+		logs.RequestError(500, logs.ErrorMsg{"必填项不能为空"}, w)
 		return
 	}
-	if tmp := js.Get("EndTime").MustString(); tmp != "" {
-		end = lessonToTime(tmp)
-	} else {
-		w.WriteHeader(500)
-		data, _ = json.Marshal(logs.ErrorMsg{Msg: "结束时间不能为空"})
-		w.Write(data)
-		return
-	}
-	if tmp := js.Get("ResReason").MustString(); tmp != "" {
-		reason = tmp
-	} else {
-		w.WriteHeader(500)
-		data, _ = json.Marshal(logs.ErrorMsg{Msg: "申请原因不能为空"})
-		w.Write(data)
-		return
-	}
-	if tmp := js.Get("ClassroomId").MustInt(); tmp != 0 {
-		classroomId = tmp
-	} else {
-		w.WriteHeader(500)
-		data, _ = json.Marshal(logs.ErrorMsg{Msg: "申请教室不能为空"})
-		w.Write(data)
-		return
-	}
+	start := lessonToTime(start_time)
+	end := lessonToTime(end_time)
 
 	approvalNote := ""
+
+	var studentId int
+	studentId, _ = strconv.Atoi(r.Header.Get("userId"))
 
 	department, err := services.DepartmentService.FindInfoByNote("initial")
 	if logs.SqlError(err, w, department.DepartmentName != "") {
 		return
 	}
 	departmentId := department.DepartmentId
-
-	var studentId int
-	studentId, _ = strconv.Atoi(r.Header.Get("userId"))
-
-	std, err := services.StudentService.FindInfoById(studentId)
-	if logs.SqlError(err, w, std.StudentName != "") {
-		return
-	}
-	organizationId := std.OrganizationId
-
 	approvers, err := services.ApproverService.FindInfoByDepartmentId(departmentId)
 	if logs.SqlError(err, w, len(approvers) != 0) {
 		return
@@ -969,8 +984,8 @@ func addRes(w http.ResponseWriter, r *http.Request) {
 	//random select a approver from the approvers who belong to the same department
 	approverId := approvers[rand.Intn(len(approvers))].ApproverId
 
-	res := services.ReservationService.NewReservation(state, start, end, departmentId, reason,
-		approvalNote, studentId, approverId, classroomId, organizationId)
+	res := services.ReservationService.NewReservation(reason, start, end, classroomId, studentId,
+		organizationName, approverId, approvalNote, 0)
 	err = services.ReservationService.SaveAInfo(res)
 
 	if logs.SqlError(err, w, true) {
@@ -998,6 +1013,7 @@ func getDepartmentList(w http.ResponseWriter, r *http.Request) {
 
 /*
 * Add a department information to db
+* At the same time, the order should update. Default the order be latest; if define, than set custom the order.
  */
 func addDepartment(w http.ResponseWriter, r *http.Request) {
 
@@ -1017,7 +1033,7 @@ func addDepartment(w http.ResponseWriter, r *http.Request) {
 
 	//update the order of the approval department
 	departments, err := services.DepartmentService.FindAllInfo()
-	if logs.SqlError(err, w, len(departments) != 0) {
+	if logs.SqlError(err, w, true) {
 		return
 	}
 	for _, v := range departments {
@@ -1031,7 +1047,9 @@ func addDepartment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var note string
-	if order > len(departments) {
+	if len(departments) == 0 {
+		note = "initial,final"
+	} else if order > len(departments) {
 		note = "final"
 	} else if order == 1 {
 		note = "initial"
@@ -1078,28 +1096,35 @@ func updateDepartmentById(w http.ResponseWriter, r *http.Request) {
 	name := js.Get("DepartmentName").MustString()
 	intro := js.Get("Introduction").MustString()
 	order := js.Get("Order").MustInt()
-	department_now, err := services.DepartmentService.FindInfoById(id)
-	if logs.SqlError(err, w, department_now.DepartmentName != "") {
-		return
-	}
-	department, err := services.DepartmentService.FindInfoByOrder(order)
-	if logs.SqlError(err, w, department.DepartmentName != "") {
+	if name == "" || intro == "" || order == 0 {
+		logs.RequestError(500, logs.ErrorMsg{"必填字段不能为空"}, w)
 		return
 	}
 
-	if id == department.DepartmentId {
-		err = services.DepartmentService.UpdateInfo(id, name, intro, order, department.Note)
+	// Get department by id and order.
+	departmentUpdate, err := services.DepartmentService.FindInfoById(id)
+	if logs.SqlError(err, w, departmentUpdate.DepartmentName != "") {
+		return
+	}
+	departmentNoUpdate, err := services.DepartmentService.FindInfoByOrder(order)
+	if logs.SqlError(err, w, departmentNoUpdate.DepartmentName != "") {
+		return
+	}
+
+	// If order no update, then update other information.
+	if id == departmentNoUpdate.DepartmentId {
+		err = services.DepartmentService.UpdateInfo(id, name, intro, order, departmentUpdate.Note)
 		if logs.SqlError(err, w, true) {
 			return
 		}
-	} else {
-		err = services.DepartmentService.UpdateInfo(id, name, intro, order, department.Note)
+	} else { // If order update, then change the two information.
+		err = services.DepartmentService.UpdateInfo(id, name, intro, order, departmentUpdate.Note)
 		if logs.SqlError(err, w, true) {
 			return
 		}
 
-		err = services.DepartmentService.UpdateInfo(department.DepartmentId, department_now.DepartmentName, department_now.Introduction,
-			department_now.Order, department_now.Note)
+		err = services.DepartmentService.UpdateInfo(departmentNoUpdate.DepartmentId, departmentNoUpdate.DepartmentName, departmentNoUpdate.Introduction,
+			departmentUpdate.Order, departmentNoUpdate.Note)
 		if logs.SqlError(err, w, true) {
 			return
 		}
@@ -1119,33 +1144,40 @@ func deleteDepartmentById(w http.ResponseWriter, r *http.Request) {
 	if logs.SqlError(err, w, del_dep.DepartmentName != "") {
 		return
 	}
+	err = services.DepartmentService.DeleteInfo(id)
+	if logs.SqlError(err, w, true) {
+		return
+	}
 
+	// Update order
 	departments, err := services.DepartmentService.FindAllInfo()
 	if logs.SqlError(err, w, len(departments) != 0) {
 		return
 	}
-	order := len(departments)
+	order := del_dep.Order
 	for _, v := range departments {
-		if v.DepartmentId == id {
-			err = services.DepartmentService.DeleteInfo(id)
-			if logs.SqlError(err, w, true) {
-				return
-			}
-			order = v.Order
-		}
 		if v.Order > order {
-			err = services.DepartmentService.UpdateInfo(v.DepartmentId, v.DepartmentName, v.Introduction, order,
+			err = services.DepartmentService.UpdateInfo(v.DepartmentId, v.DepartmentName, v.Introduction, v.Order-1,
 				v.Note)
 			if logs.SqlError(err, w, true) {
 				return
 			}
-			order += 1
 		}
 	}
 
-	//delete the approvers which belong to the department
+	//Define some variable for updating reservatons
+	new_dep, err := services.DepartmentService.FindInfoByOrder(del_dep.Order)
+	if logs.SqlError(err, w, new_dep.DepartmentName != "") {
+		return
+	}
+	new_approvers, err := services.ApproverService.FindInfoByDepartmentId(new_dep.DepartmentId)
+	if logs.SqlError(err, w, len(new_approvers) != 0) {
+		return
+	}
+
+	//Delete the approvers which belong to the department
 	approvers, err := services.ApproverService.FindInfoByDepartmentId(id)
-	if logs.SqlError(err, w, len(approvers) != 0) {
+	if logs.SqlError(err, w, true) {
 		return
 	}
 	for _, v := range approvers {
@@ -1153,137 +1185,18 @@ func deleteDepartmentById(w http.ResponseWriter, r *http.Request) {
 		if logs.SqlError(err, w, true) {
 			return
 		}
-	}
 
-	//update reservatons
-	new_dep, err := services.DepartmentService.FindInfoByOrder(del_dep.Order)
-	if logs.SqlError(err, w, new_dep.DepartmentName != "") {
-		return
-	}
-	approvers, err = services.ApproverService.FindInfoByDepartmentId(new_dep.DepartmentId)
-	if logs.SqlError(err, w, len(approvers) != 0) {
-		return
-	}
-	reservations, err := services.ReservationService.FindInfoByDepartmentId(id)
-	if logs.SqlError(err, w, len(reservations) != 0) {
-		return
-	}
-	for _, v := range reservations {
-		v.ApproverId = approvers[rand.Intn(len(approvers))].ApproverId
-		v.DepartmentId = new_dep.DepartmentId
-		err := services.ReservationService.UpdateInfo(v.ResId, v.ApproverId, v.DepartmentId)
+		//Update reservations.
+		reservations, err := services.ReservationService.FindInfoByApproverId(v.ApproverId)
 		if logs.SqlError(err, w, true) {
 			return
 		}
-	}
-
-	w.WriteHeader(200)
-}
-
-/************************* Data Interface For Organization ***********************/
-/*
-* Get a list of organizations.
-* Just accessed for admin.
- */
-func getOrganizationList(w http.ResponseWriter, r *http.Request) {
-	orgs, err := services.OrganizationService.FindAllInfo()
-	if logs.SqlError(err, w, len(orgs) != 0) {
-		return
-	}
-
-	data, _ := json.Marshal(orgs)
-	w.WriteHeader(200)
-	w.Write(data)
-}
-
-/*
-* Add a organization to db.
-* Just accessed for admin
- */
-func addOrganization(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-	js, err := simplejson.NewFromReader(r.Body)
-	if logs.NormalError(err, w) {
-		return
-	}
-
-	name := js.Get("OrganizationName").MustString()
-	intro := js.Get("Introduction").MustString()
-	if name == "" || intro == "" {
-		w.WriteHeader(500)
-		data, _ := json.Marshal(logs.ErrorMsg{Msg: "必填字段不能为空"})
-		w.Write(data)
-	}
-
-	org := services.OrganizationService.NewOrganization(name, intro)
-	err = services.OrganizationService.SaveAInfo(org)
-	if logs.SqlError(err, w, true) {
-		return
-	}
-	w.WriteHeader(200)
-}
-
-/*
-* Get a piece of organization iformation.
-* Accessed for the admin, and student.
- */
-func getOrganizationById(w http.ResponseWriter, r *http.Request) {
-	id := getIdFromPath(r)
-
-	org, err := services.OrganizationService.FindInfoById(id)
-	if logs.SqlError(err, w, org.OrganizationName != "") {
-		return
-	}
-
-	data, _ := json.Marshal(*org)
-	w.WriteHeader(200)
-	w.Write(data)
-}
-
-/*
-* Update the organization, include the name and introduction.
-* Just accessed for the admin.
- */
-func updateOrganizationById(w http.ResponseWriter, r *http.Request) {
-	id := getIdFromPath(r)
-
-	defer r.Body.Close()
-	js, err := simplejson.NewFromReader(r.Body)
-	if logs.NormalError(err, w) {
-		return
-	}
-
-	name := js.Get("OrganizationName").MustString()
-	intro := js.Get("Introduction").MustString()
-	err = services.OrganizationService.UpdateInfo(id, name, intro)
-	if logs.SqlError(err, w, true) {
-		return
-	}
-	w.WriteHeader(200)
-}
-
-/*
-* Delete a piece of organization information
-* Default will change the students information who are associated with the delete information.
- */
-func deleteOrganizationById(w http.ResponseWriter, r *http.Request) {
-	id := getIdFromPath(r)
-
-	// Delete the organization
-	err := services.OrganizationService.DeleteInfo(id)
-	if logs.SqlError(err, w, true) {
-		return
-	}
-	// Change the student information associated
-	stds, err := services.StudentService.FindInfoByOrganizationId(id)
-	if logs.SqlError(err, w, len(stds) != 0) {
-		return
-	}
-
-	for _, v := range stds {
-		err = services.StudentService.UpdatetOrganizationInfo(v.StudentId, 1)
-		if logs.SqlError(err, w, true) {
-			return
+		for _, res := range reservations {
+			res.ApproverId = approvers[rand.Intn(len(new_approvers))].ApproverId
+			err := services.ReservationService.UpdateInfo(res.ResId, res.ResReason, res.OrganizationName, res.ResState, res.ApprovalNote, res.ApproverId)
+			if logs.SqlError(err, w, true) {
+				return
+			}
 		}
 	}
 

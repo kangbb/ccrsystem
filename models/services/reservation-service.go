@@ -10,19 +10,18 @@ type ReservationInfoService struct{}
 
 var ReservationService = ReservationInfoService{}
 
-func (*ReservationInfoService) NewReservation(state string, start time.Time, end time.Time, departmentId int,
-	reason string, note string, studentId int, approverId int, classroomId int, OrganizationId int) *entities.ReservationInfo {
+func (*ReservationInfoService) NewReservation(reason string, start time.Time, end time.Time, classroomId int,
+	studentId int, organizationName string, approverId int, note string, state int) *entities.ReservationInfo {
 	reservation := &entities.ReservationInfo{
-		ResState:       state,
-		StartTime:      start,
-		EndTime:        end,
-		ResReason:      reason,
-		ApprovalNote:   note,
-		DepartmentId:   departmentId,
-		StudentId:      studentId,
-		ApproverId:     approverId,
-		ClassroomId:    classroomId,
-		OrganizationId: OrganizationId,
+		ResReason:        reason,
+		StartTime:        start,
+		EndTime:          end,
+		ClassroomId:      classroomId,
+		StudentId:        studentId,
+		OrganizationName: organizationName,
+		ApproverId:       approverId,
+		ApprovalNote:     note,
+		ResState:         state,
 	}
 	return reservation
 }
@@ -62,10 +61,10 @@ func (*ReservationInfoService) FindInfoByStudentId(studentId int) ([]entities.Re
 	return reservations, err
 }
 
-//Get resvation information by department Id
-func (*ReservationInfoService) FindInfoByDepartmentId(departmentId int) ([]entities.ReservationInfo, error) {
+//Get reservation information by classroom Id
+func (*ReservationInfoService) FindInfoByClassroomId(classroomId int) ([]entities.ReservationInfo, error) {
 	reservations := make([]entities.ReservationInfo, 0)
-	err := entities.SlaveEngine.Where("department_id = ?", departmentId).Find(&reservations)
+	err := entities.SlaveEngine.Where("classroom_id = ?", classroomId).Find(&reservations)
 
 	return reservations, err
 }
@@ -79,22 +78,22 @@ func (*ReservationInfoService) FindAllInfo() ([]entities.ReservationInfo, error)
 }
 
 //Update reservation information
-//Just for ResState, Department, ApproverId and ApproverNote
+//Just for resReason, organizationName, resState, approvalNote, and approverId.
 func (*ReservationInfoService) UpdateInfo(id int, arg ...interface{}) error {
 	reservation := new(entities.ReservationInfo)
 	switch len(arg) {
 	case 5:
-		reservation.ResReason = arg[4].(string)
+		reservation.ApproverId = arg[4].(int)
 	case 4:
-		reservation.ApprovalNote = arg[2].(string)
-		reservation.ResState = arg[3].(string)
+		reservation.ApprovalNote = arg[3].(string)
+		reservation.ResState = arg[2].(int)
 	case 2:
-		reservation.ApproverId = arg[0].(int)
-		reservation.DepartmentId = arg[1].(int)
+		reservation.OrganizationName = arg[1].(string)
+		reservation.ResReason = arg[0].(string)
 		break
 	default:
 	}
-	_, err := entities.MasterEngine.AllCols().Id(id).Update(reservation)
+	_, err := entities.MasterEngine.Cols("res_reason", "organization_name", "res_state", "approval_note", "approver_id").Id(id).Update(reservation)
 
 	return err
 }
@@ -112,18 +111,23 @@ func (*ReservationInfoService) DeleteInfo(id int) error {
 func (*ReservationInfoService) GetReservationBySomeCond(classroomId int, arg ...interface{}) ([]entities.ReservationInfo, error) {
 	var err error
 	reservations := make([]entities.ReservationInfo, 0)
-	switch len(arg) {
-	case 0:
-		err = entities.SlaveEngine.Where("classroom_id = ?", classroomId).Find(&reservations)
-		break
-	case 1:
-		err = entities.SlaveEngine.Where("classroom_id = ? AND (start_time > ? OR  end_time < ?)",
-			classroomId, arg[0].(time.Time), arg[0].(time.Time)).Find(&reservations)
-		break
-	default:
-		err = entities.SlaveEngine.Where("classroom_id = ? AND (start_time > ? OR  end_time < ?)",
-			classroomId, arg[1].(time.Time), arg[0].(time.Time)).Find(&reservations)
-	}
+	// To implement the fuzzy query(模糊查询)
+	// switch len(arg) {
+	// case 0:
+	// 	err = entities.SlaveEngine.Where("classroom_id = ?", classroomId).Find(&reservations)
+	// 	break
+	// case 1:
+	// 	err = entities.SlaveEngine.Where("classroom_id = ? AND (start_time > ? OR  end_time < ?)",
+	// 		classroomId, arg[0].(time.Time), arg[0].(time.Time)).Find(&reservations)
+	// 	break
+	// default:
+	// 	err = entities.SlaveEngine.Where("classroom_id = ? AND (start_time > ? OR  end_time < ?)",
+	// 		classroomId, arg[1].(time.Time), arg[0].(time.Time)).Find(&reservations)
+	// }
+
+	// To implement the accurate query
+	err = entities.SlaveEngine.Where("classroom_id = ? AND ((start_time <= ? AND  end_time >= ?) OR (start_time <= ? AND  end_time >= ?))",
+		classroomId, arg[0].(time.Time), arg[0].(time.Time), arg[1].(time.Time), arg[1].(time.Time)).Find(&reservations)
 
 	return reservations, err
 }

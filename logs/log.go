@@ -129,3 +129,13 @@ func NormalError(err error, arg ...interface{}) bool {
 	}
 	return false
 }
+
+/*
+* Return the custom error which is result in the wrong parameters or a wrong request.
+* Accept a custom error and a http.ResponseWriter, and return nothing.
+ */
+func RequestError(statusCode int, msg ErrorMsg, w http.ResponseWriter) {
+	w.WriteHeader(statusCode)
+	data, _ := json.Marshal(msg)
+	w.Write(data)
+}

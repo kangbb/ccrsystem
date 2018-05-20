@@ -4,10 +4,9 @@ package entities
 * StudentInfo store student information
  */
 type StudentInfo struct {
-	StudentId      int `xorm:"pk 'id'"`
-	StudentPwd     string
-	StudentName    string
-	OrganizationId int
+	StudentId   int `xorm:"pk 'id'"`
+	StudentPwd  string
+	StudentName string
 }
 
 /*

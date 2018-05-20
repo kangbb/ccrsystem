@@ -88,7 +88,9 @@ func (*ClassroomInfoService) GetClassroomBySomeCond(arg ...interface{}) ([]entit
 			arg[1]).Find(&classrooms)
 		break
 	case 3:
-		err = entities.SlaveEngine.Where("classroom_campus = ? AND  classroom_building = ? and capacity > ?", arg[0],
+		// err = entities.SlaveEngine.Where("classroom_campus = ? AND  classroom_building = ? and capacity > ?", arg[0],
+		// 	arg[1], arg[2]).Find(&classrooms)
+		err = entities.SlaveEngine.Where("classroom_campus = ? AND  classroom_building = ? and capacity = ?", arg[0],
 			arg[1], arg[2]).Find(&classrooms)
 	}
 

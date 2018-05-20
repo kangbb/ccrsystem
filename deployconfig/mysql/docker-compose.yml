@@ -1,0 +1,44 @@
+version: "3"
+services:
+  dbmaster:
+    image: registry-vpc.cn-shenzhen.aliyuncs.com/selfmysql/master:latest
+    container_name: dbmaster
+    ports:
+      - "3307:3306"
+    volumes:
+      - $HOME/mysql/dbmaster:/var/lib/mysql
+    privileged: true
+    environment:
+      MYSQL_ROOT_PASSWORD: master
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1000k"
+        max-file: "20"
+    networks:
+      - app
+
+  dbslave:
+    image: registry-vpc.cn-shenzhen.aliyuncs.com/selfmysql/slave:latest
+    container_name: dbslave
+    ports:
+      - "3308:3306"
+    depends_on:
+      - dbmaster
+    volumes:
+      - $HOME/mysql/dbslave:/var/lib/mysql
+    privileged: true
+    environment:
+      MYSQL_ROOT_PASSWORD: slave
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1000k"
+        max-file: "20"
+    links:
+      - dbmaster
+    networks:
+      - app
+networks:
+  app:
+    driver: bridge

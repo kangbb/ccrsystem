@@ -87,3 +87,30 @@ SlaveEngine, err = xorm.NewEngine("mysql", "root:slave@tcp(localhost:3308)/ccrsy
 ```bash
 $ go test .
 ```
+
+## 构建并运行项目Docker
+**1. 创建数据文件夹**
+
+例如，笔者的数据文件夹位置及结构如下：
+```
+# 系统日志文件
+$HOME/data/ccrsystem-data/ccrsystemlog
+# sql数据库日志文件
+$HOME/data/ccrsystem-data/sql
+# session文件
+$HOME/data/ccrsystem-data/sessions
+```
+
+**2. 构建镜像**
+
+在项目根目录运行：
+```
+$ docker build -t image/ccrsystem:latest .
+```
+
+**3. 启动容器**
+
+在`/testconfig/ccrsystem/`目录下运行：
+```
+$ docker-compose up -d
+```

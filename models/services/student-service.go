@@ -11,12 +11,11 @@ var StudentService = StudentInfoService{}
 /*
 * Create a new student information.
  */
-func (*StudentInfoService) NewStudent(id int, pwd string, name string, organizationId int) *entities.StudentInfo {
+func (*StudentInfoService) NewStudent(id int, pwd string, name string) *entities.StudentInfo {
 	student := &entities.StudentInfo{
-		StudentId:      id,
-		StudentPwd:     pwd,
-		StudentName:    name,
-		OrganizationId: organizationId,
+		StudentId:   id,
+		StudentPwd:  pwd,
+		StudentName: name,
 	}
 	return student
 }
@@ -41,16 +40,6 @@ func (*StudentInfoService) FindInfoById(id int) (*entities.StudentInfo, error) {
 }
 
 /*
-* Get a student information by organizationId
- */
-func (*StudentInfoService) FindInfoByOrganizationId(organizationId int) ([]entities.StudentInfo, error) {
-	stds := make([]entities.StudentInfo, 0)
-	err := entities.SlaveEngine.Where("department_id = ?", organizationId).Find(&stds)
-
-	return stds, err
-}
-
-/*
 * Find all student information
  */
 func (*StudentInfoService) FindAllInfo() ([]entities.StudentInfo, error) {
@@ -66,18 +55,6 @@ func (*StudentInfoService) FindAllInfo() ([]entities.StudentInfo, error) {
 func (*StudentInfoService) UpdateInfo(id int, pwd string) error {
 	std := new(entities.StudentInfo)
 	std.StudentPwd = pwd
-
-	_, err := entities.MasterEngine.Id(id).Update(std)
-
-	return err
-}
-
-/*
-* Update Student organition information
- */
-func (*StudentInfoService) UpdatetOrganizationInfo(id int, organizationId int) error {
-	std := new(entities.StudentInfo)
-	std.OrganizationId = organizationId
 
 	_, err := entities.MasterEngine.Id(id).Update(std)
 

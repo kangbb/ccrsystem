@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/kangbb/ccrsystem/controllers"
@@ -528,6 +529,7 @@ func TestAddRes(t *testing.T) {
 	}
 
 	//Test wether the data has in databases
+	time.Sleep(10)
 	req = httptest.NewRequest(
 		http.MethodGet,
 		"/api/users/student/reservations",
