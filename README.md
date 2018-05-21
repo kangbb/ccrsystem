@@ -66,3 +66,11 @@ $ node server.js
 [跨域资源共享 CORS 详解](http://www.ruanyifeng.com/blog/2016/04/cors.html)
 
 [MDN HTTP访问控制(CORS)](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CORS)
+
+### 日志
+
+1. 日志管理策略之一——日志轮转
+
+[日志轮转](https://www.cnblogs.com/guo-xiang/p/5806563.html)
+
+[logrotate简单实现各种日志自动轮转](https://blog.csdn.net/nerissa/article/details/17707913)

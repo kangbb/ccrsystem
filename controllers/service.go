@@ -261,7 +261,7 @@ func addUser(userType string, w http.ResponseWriter, r *http.Request) {
 	}
 
 	id := js.Get(userType + "Id").MustInt()
-	pwd := encryptPwd(id, js.Get(userType+"Pwd").MustString())
+	pwd := encryptPwd(id, "123456")
 	switch userType {
 	case "Student":
 		user := services.StudentService.NewStudent(id, pwd, js.Get("StudentName").MustString())
