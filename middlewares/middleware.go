@@ -83,6 +83,7 @@ func Authentication(next http.Handler) http.Handler {
 		// Give the  user type to the business handle functions, for further verification of the permission
 		r.Header.Set("userType", session.Values["type"].(string))
 		r.Header.Set("userId", session.Values["id"].(string))
+		w.Header().Set("Content-Type", "application/json")
 		next.ServeHTTP(w, r)
 	})
 }

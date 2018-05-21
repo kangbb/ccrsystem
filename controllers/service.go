@@ -552,21 +552,21 @@ func addClassroom(w http.ResponseWriter, r *http.Request) {
 * Accessed for all users, which are student, approver, admin
  */
 func queryClassroom(w http.ResponseWriter, r *http.Request) {
-
-	//default use the parameter from r.body
-	defer r.Body.Close()
-	js, err := simplejson.NewFromReader(r.Body)
-	if logs.NormalError(err, w) {
-		return
-	}
-
-	campuse := js.Get("ClassroomCampus").MustString()
-	building := js.Get("ClassroomBuilding").MustString()
-	capacity := js.Get("Capacity").MustInt()
-	if campuse == "" || building == "" || capacity == 0 {
+	var capacity int
+	//Get request, parameters in headers
+	r.ParseForm()
+	campuse := r.Form["ClassroomCampus"][0]
+	building := r.Form["ClassroomBuilding"][0]
+	capacity, _ = strconv.Atoi(r.Form["Capacity"][0])
+	start_time := r.Form["StartTime"][0]
+	end_time := r.Form["EndTime"][0]
+	if campuse == "" || building == "" || capacity == 0 || start_time == "" || end_time == "" {
 		logs.RequestError(500, logs.ErrorMsg{Msg: "必填项不能为空"}, w)
 		return
 	}
+	start := lessonToTime(start_time)
+	end := lessonToTime(end_time)
+
 	//query classrooms which meet the require
 	classrooms, err := services.ClassroomService.GetClassroomBySomeCond(campuse, building, capacity)
 	if logs.SqlError(err, w, len(classrooms) != 0) {
@@ -577,9 +577,6 @@ func queryClassroom(w http.ResponseWriter, r *http.Request) {
 	// If do, then will result in error: index out of range
 	result := services.ClassroomService.NewClassroomSlice()
 	for _, v := range classrooms {
-		start := lessonToTime(js.Get("StartTime").MustString())
-		end := lessonToTime(js.Get("EndTime").MustString())
-
 		//query the state of the each classroom
 		res, err := services.ReservationService.GetReservationBySomeCond(v.ClassroomId, start, end)
 		if logs.SqlError(err, w, true) {
@@ -809,7 +806,7 @@ func updateResById(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			if department.Note == "final" {
+			if department.Note == "final" || department.Note == "initial,final" {
 				state = 3
 			} else {
 				state = 1
@@ -1036,12 +1033,30 @@ func addDepartment(w http.ResponseWriter, r *http.Request) {
 	if logs.SqlError(err, w, true) {
 		return
 	}
-	for _, v := range departments {
-		if v.Order >= order {
-			err = services.DepartmentService.UpdateInfo(v.DepartmentId, v.DepartmentName, v.Introduction,
-				v.Order+1, v.Note)
-			if logs.SqlError(err, w, true) {
-				return
+
+	val := departments[0]
+	if len(departments) == 1 && order > departments[0].Order {
+		val.Note = "initial"
+		err = services.DepartmentService.UpdateInfo(val.DepartmentId, val.DepartmentName, val.Introduction,
+			val.Order+1, val.Note)
+		if logs.SqlError(err, w, true) {
+			return
+		}
+	} else if len(departments) == 1 && order == departments[0].Order {
+		val.Note = "final"
+		err = services.DepartmentService.UpdateInfo(val.DepartmentId, val.DepartmentName, val.Introduction,
+			val.Order+1, val.Note)
+		if logs.SqlError(err, w, true) {
+			return
+		}
+	} else {
+		for _, v := range departments {
+			if v.Order >= order {
+				err = services.DepartmentService.UpdateInfo(v.DepartmentId, v.DepartmentName, v.Introduction,
+					v.Order+1, v.Note)
+				if logs.SqlError(err, w, true) {
+					return
+				}
 			}
 		}
 	}
@@ -1144,8 +1159,8 @@ func deleteDepartmentById(w http.ResponseWriter, r *http.Request) {
 	if logs.SqlError(err, w, del_dep.DepartmentName != "") {
 		return
 	}
-	err = services.DepartmentService.DeleteInfo(id)
-	if logs.SqlError(err, w, true) {
+	if del_dep.Note == "initial,final" {
+		logs.RequestError(500, logs.ErrorMsg{Msg: "系统正常运行，至少需要保留一个部门"}, w)
 		return
 	}
 
@@ -1155,14 +1170,41 @@ func deleteDepartmentById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	order := del_dep.Order
+	isUPdateNoteInitial := false
+	isUPdateNoteFinal := false
+	if del_dep.Note == "initial" && len(departments) == 2 {
+		departments[1].Note = "initial,final"
+	} else if del_dep.Note == "final" && len(departments) == 2 {
+		departments[0].Note = "initial,final"
+	} else if del_dep.Note == "initial" {
+		isUPdateNoteInitial = true
+	} else if del_dep.Note == "final" {
+		isUPdateNoteFinal = true
+	}
+
 	for _, v := range departments {
+		if isUPdateNoteFinal && v.Order == (order-1) {
+			err = services.DepartmentService.UpdateInfo(v.DepartmentId, v.DepartmentName, v.Introduction, v.Order,
+				"final")
+			if logs.SqlError(err, w, true) {
+				return
+			}
+		}
 		if v.Order > order {
+			if isUPdateNoteInitial && v.Order == (order+1) {
+				v.Note = "initial"
+			}
 			err = services.DepartmentService.UpdateInfo(v.DepartmentId, v.DepartmentName, v.Introduction, v.Order-1,
 				v.Note)
 			if logs.SqlError(err, w, true) {
 				return
 			}
 		}
+	}
+	// Delete the department.
+	err = services.DepartmentService.DeleteInfo(id)
+	if logs.SqlError(err, w, true) {
+		return
 	}
 
 	//Define some variable for updating reservatons

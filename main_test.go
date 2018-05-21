@@ -194,10 +194,9 @@ func TestDeleteStudentById(t *testing.T) {
  */
 func TestAddStudent(t *testing.T) {
 	reqData := entities.StudentInfo{
-		StudentId:      15331124,
-		StudentPwd:     "123456",
-		StudentName:    "王芳",
-		OrganizationId: 1,
+		StudentId:   15331124,
+		StudentPwd:  "123456",
+		StudentName: "王芳",
 	}
 	reqBody, _ := json.Marshal(reqData)
 	req := httptest.NewRequest(
@@ -381,28 +380,30 @@ func TestDeleteClassroomById(t *testing.T) {
 /*
 * Test query classroom information function.
  */
-func TestQueryClassroom(t *testing.T) {
-	reqData := struct {
-		ClassroomCampus   string
-		ClassroomBuilding string
-		Capicity          int
-	}{"东校园", "公教楼", 50}
-	reqBody, _ := json.Marshal(reqData)
-	req := httptest.NewRequest(
-		http.MethodGet,
-		"/api/classrooms/state",
-		bytes.NewReader(reqBody),
-	)
+// func TestQueryClassroom(t *testing.T) {
+// 	reqData := struct {
+// 		ClassroomCampus   string
+// 		ClassroomBuilding string
+// 		StartTime         string
+// 		EndTime           string
+// 		Capicity          int
+// 	}{"东校园", "公教楼", "2018-05-23 第三节课", "2018-05-23 第五节课", 50}
+// 	reqBody, _ := json.Marshal(reqData)
+// 	req := httptest.NewRequest(
+// 		http.MethodGet,
+// 		"/api/classrooms/state",
+// 		bytes.NewReader(reqBody),
+// 	)
 
-	w := httptest.NewRecorder()
-	controllers.QueryClassroom(w, req)
+// 	w := httptest.NewRecorder()
+// 	controllers.QueryClassroom(w, req)
 
-	resp := w.Result()
-	if resp.StatusCode != 200 {
-		t.Fail()
-		errStdout(t, resp)
-	}
-}
+// 	resp := w.Result()
+// 	if resp.StatusCode != 200 {
+// 		t.Fail()
+// 		errStdout(t, resp)
+// 	}
+// }
 
 /*------------------------Reservation Data Interface Test--------------------*/
 /*
