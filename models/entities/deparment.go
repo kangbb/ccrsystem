@@ -4,8 +4,8 @@ package entities
 * DepartmentInfo store approval department information
  */
 type DepartmentInfo struct {
-	DepartmentId   int `xorm:"'id' autoincr pk"`
-	DepartmentName string
+	DepartmentId   int    `xorm:"'id' autoincr pk"`
+	DepartmentName string `xorm:"unique"`
 	Introduction   string
 	Order          int
 	Note           string

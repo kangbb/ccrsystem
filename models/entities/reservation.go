@@ -10,9 +10,9 @@ import (
 type ReservationInfo struct {
 	ResId            int `xorm:"autoincr pk 'id'"`
 	ResReason        string
-	StartTime        time.Time
-	EndTime          time.Time
-	ClassroomId      int `xorm:"'classroom_id'"`
+	StartTime        time.Time `xorm:"unique(reservation)"`
+	EndTime          time.Time `xorm:"unique(reservation)"`
+	ClassroomId      int       `xorm:"unique(reservation)"`
 	StudentId        int
 	OrganizationName string
 	ApproverId       int
