@@ -13,10 +13,10 @@ var DepartmentService = DepartmentInfoService{}
  */
 func (*DepartmentInfoService) NewDeparment(name string, introduction string, order int, note string) *entities.DepartmentInfo {
 	department := &entities.DepartmentInfo{
-		DepartmentName: name,
-		Introduction:   introduction,
-		Order:          order,
-		Note:           note,
+		DepartmentName:  name,
+		Introduction:    introduction,
+		DepartmentOrder: order,
+		Note:            note,
 	}
 	return department
 }
@@ -55,7 +55,7 @@ func (*DepartmentInfoService) FindInfoByNote(note string) (*entities.DepartmentI
  */
 func (*DepartmentInfoService) FindInfoByOrder(order int) (*entities.DepartmentInfo, error) {
 	department := new(entities.DepartmentInfo)
-	_, err := entities.SlaveEngine.Where("order = ?", order).Get(department)
+	_, err := entities.SlaveEngine.Where("department_order = ?", order).Get(department)
 
 	return department, err
 }
@@ -65,7 +65,7 @@ func (*DepartmentInfoService) FindInfoByOrder(order int) (*entities.DepartmentIn
  */
 func (*DepartmentInfoService) FindAllInfo() ([]entities.DepartmentInfo, error) {
 	department := make([]entities.DepartmentInfo, 0)
-	err := entities.SlaveEngine.Asc("order").Find(&department)
+	err := entities.SlaveEngine.Asc("department_order").Find(&department)
 
 	return department, err
 }
@@ -78,7 +78,7 @@ func (*DepartmentInfoService) UpdateInfo(id int, name string, introduction strin
 	department.DepartmentId = id
 	department.DepartmentName = name
 	department.Introduction = introduction
-	department.Order = order
+	department.DepartmentOrder = order
 	department.Note = note
 
 	_, err := entities.MasterEngine.Id(id).Update(department)

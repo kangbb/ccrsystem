@@ -430,10 +430,10 @@ func deleteUserById(userType string, w http.ResponseWriter, r *http.Request) {
 			if logs.SqlError(err, w, len(departments) != 0) {
 				return
 			}
-			order := del_dep.Order
+			order := del_dep.DepartmentOrder
 			for _, v := range departments {
-				if v.Order > order {
-					err = services.DepartmentService.UpdateInfo(v.DepartmentId, v.DepartmentName, v.Introduction, v.Order-1,
+				if v.DepartmentOrder > order {
+					err = services.DepartmentService.UpdateInfo(v.DepartmentId, v.DepartmentName, v.Introduction, v.DepartmentOrder-1,
 						v.Note)
 					if logs.SqlError(err, w, true) {
 						return
@@ -443,7 +443,7 @@ func deleteUserById(userType string, w http.ResponseWriter, r *http.Request) {
 
 			// Update reservation
 			//Define some variable for updating reservatons
-			new_dep, err := services.DepartmentService.FindInfoByOrder(del_dep.Order)
+			new_dep, err := services.DepartmentService.FindInfoByOrder(del_dep.DepartmentOrder)
 			if logs.SqlError(err, w, new_dep.DepartmentName != "") {
 				return
 			}
@@ -807,11 +807,11 @@ func updateResById(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if department.Note == "final" || department.Note == "initial,final" {
-				state = 3
+				state = 2
 			} else {
 				state = 1
 
-				department, err = services.DepartmentService.FindInfoByOrder(department.Order + 1)
+				department, err = services.DepartmentService.FindInfoByOrder(department.DepartmentOrder + 1)
 				if logs.SqlError(err, w, department.DepartmentName != "") {
 					return
 				}
@@ -1021,7 +1021,7 @@ func addDepartment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	name := js.Get("DepartmentName").MustString()
-	order := js.Get("Order").MustInt()
+	order := js.Get("DepartmentOrder").MustInt()
 	introduction := js.Get("Introduction").MustString()
 	if name == "" || introduction == "" || order == 0 {
 		w.WriteHeader(500)
@@ -1035,25 +1035,25 @@ func addDepartment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	val := departments[0]
-	if len(departments) == 1 && order > departments[0].Order {
+	if len(departments) == 1 && order > departments[0].DepartmentOrder {
 		val.Note = "initial"
 		err = services.DepartmentService.UpdateInfo(val.DepartmentId, val.DepartmentName, val.Introduction,
-			val.Order+1, val.Note)
+			val.DepartmentOrder+1, val.Note)
 		if logs.SqlError(err, w, true) {
 			return
 		}
-	} else if len(departments) == 1 && order == departments[0].Order {
+	} else if len(departments) == 1 && order == departments[0].DepartmentOrder {
 		val.Note = "final"
 		err = services.DepartmentService.UpdateInfo(val.DepartmentId, val.DepartmentName, val.Introduction,
-			val.Order+1, val.Note)
+			val.DepartmentOrder+1, val.Note)
 		if logs.SqlError(err, w, true) {
 			return
 		}
 	} else {
 		for _, v := range departments {
-			if v.Order >= order {
+			if v.DepartmentOrder >= order {
 				err = services.DepartmentService.UpdateInfo(v.DepartmentId, v.DepartmentName, v.Introduction,
-					v.Order+1, v.Note)
+					v.DepartmentOrder+1, v.Note)
 				if logs.SqlError(err, w, true) {
 					return
 				}
@@ -1110,7 +1110,7 @@ func updateDepartmentById(w http.ResponseWriter, r *http.Request) {
 	id := getIdFromPath(r)
 	name := js.Get("DepartmentName").MustString()
 	intro := js.Get("Introduction").MustString()
-	order := js.Get("Order").MustInt()
+	order := js.Get("DepartmentOrder").MustInt()
 	if name == "" || intro == "" || order == 0 {
 		logs.RequestError(500, logs.ErrorMsg{Msg: "必填字段不能为空"}, w)
 		return
@@ -1139,7 +1139,7 @@ func updateDepartmentById(w http.ResponseWriter, r *http.Request) {
 		}
 
 		err = services.DepartmentService.UpdateInfo(departmentNoUpdate.DepartmentId, departmentNoUpdate.DepartmentName, departmentNoUpdate.Introduction,
-			departmentUpdate.Order, departmentNoUpdate.Note)
+			departmentUpdate.DepartmentOrder, departmentNoUpdate.Note)
 		if logs.SqlError(err, w, true) {
 			return
 		}
@@ -1169,7 +1169,7 @@ func deleteDepartmentById(w http.ResponseWriter, r *http.Request) {
 	if logs.SqlError(err, w, len(departments) != 0) {
 		return
 	}
-	order := del_dep.Order
+	order := del_dep.DepartmentOrder
 	isUPdateNoteInitial := false
 	isUPdateNoteFinal := false
 	if del_dep.Note == "initial" && len(departments) == 2 {
@@ -1183,18 +1183,18 @@ func deleteDepartmentById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, v := range departments {
-		if isUPdateNoteFinal && v.Order == (order-1) {
-			err = services.DepartmentService.UpdateInfo(v.DepartmentId, v.DepartmentName, v.Introduction, v.Order,
+		if isUPdateNoteFinal && v.DepartmentOrder == (order-1) {
+			err = services.DepartmentService.UpdateInfo(v.DepartmentId, v.DepartmentName, v.Introduction, v.DepartmentOrder,
 				"final")
 			if logs.SqlError(err, w, true) {
 				return
 			}
 		}
-		if v.Order > order {
-			if isUPdateNoteInitial && v.Order == (order+1) {
+		if v.DepartmentOrder > order {
+			if isUPdateNoteInitial && v.DepartmentOrder == (order+1) {
 				v.Note = "initial"
 			}
-			err = services.DepartmentService.UpdateInfo(v.DepartmentId, v.DepartmentName, v.Introduction, v.Order-1,
+			err = services.DepartmentService.UpdateInfo(v.DepartmentId, v.DepartmentName, v.Introduction, v.DepartmentOrder-1,
 				v.Note)
 			if logs.SqlError(err, w, true) {
 				return
@@ -1208,7 +1208,7 @@ func deleteDepartmentById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Define some variable for updating reservatons
-	new_dep, err := services.DepartmentService.FindInfoByOrder(del_dep.Order)
+	new_dep, err := services.DepartmentService.FindInfoByOrder(del_dep.DepartmentOrder)
 	if logs.SqlError(err, w, new_dep.DepartmentName != "") {
 		return
 	}

@@ -69,8 +69,9 @@ $ node server.js
 
 ### 日志
 
-1. 日志管理策略之一——日志轮转
+#### 日志管理策略之一——日志轮转
 
 [日志轮转](https://www.cnblogs.com/guo-xiang/p/5806563.html)
+
 
 [logrotate简单实现各种日志自动轮转](https://blog.csdn.net/nerissa/article/details/17707913)
