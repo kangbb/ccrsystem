@@ -262,7 +262,7 @@
     methods: {
       quit() {
         delCookie('AdminId')
-        var apiStr = '/api/signout'
+        var apiStr = '/signout'
         this.$http.post(apiStr).then(res=>{
           console.log(res)
           alert('注销成功')
@@ -308,6 +308,7 @@
         })
       },
       filterClass(e) {
+        this.showError = false
         e.preventDefault()
         if (this.capacity == '') {
           alert('请选择容量！')
@@ -410,6 +411,7 @@
         })
       },
       filterStudent(e) {
+        this.showError = false
         e.preventDefault()
         if (this.grade == '') {
           alert('请选择年级！')

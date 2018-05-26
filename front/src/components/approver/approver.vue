@@ -152,19 +152,17 @@ export default {
           let reservations = res.body
           for (var item in reservations) {
             var temp = reservations[item]
-            if (temp.ResState === 0) {
-              var obj = {}
-              obj.ClassroomId = temp.ClassroomId
-              obj.ClassroomNum = temp.ClassroomNum
-              obj.Capacity = temp.Capacity
-              obj.StudentId = temp.StudentId
-              obj.StartTime = temp.StartTime
-              obj.EndTime = temp.EndTime
-              obj.ResReason = temp.ResReason
-              obj.Organization = temp.OrganizationName
-              obj.ResId = temp.ResId
-              this.waitApproveList.push(obj)
-            }
+            var obj = {}
+            obj.ClassroomId = temp.ClassroomId
+            obj.ClassroomNum = temp.ClassroomNum
+            obj.Capacity = temp.Capacity
+            obj.StudentId = temp.StudentId
+            obj.StartTime = temp.StartTime
+            obj.EndTime = temp.EndTime
+            obj.ResReason = temp.ResReason
+            obj.Organization = temp.OrganizationName
+            obj.ResId = temp.ResId
+            this.waitApproveList.push(obj)
           }
 
           if (this.waitApproveList.length === 0) {
@@ -228,7 +226,7 @@ export default {
     },
     quit () {
       delCookie('ApproverId')
-      let apistr = '/api/signout'
+      let apistr = '/signout'
       this.$http.post(apistr).then(res => {
         if (res.status === 200) {
           console.log(res)

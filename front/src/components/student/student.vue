@@ -438,7 +438,7 @@ export default {
     },
     quit () {
       delCookie('StudentId')
-      var apiStr = '/api/signout'
+      var apiStr = '/signout'
       this.$http.post(apiStr).then(res=>{
         console.log(res)
         alert('注销成功')
@@ -461,6 +461,7 @@ export default {
       this.$http.put(apiStr, {StudentPwd: this.password}).then(res=>{
         console.log(res)
         alert('修改密码成功！')
+        this.quit()
       }).catch(err=>{
         alert('修改密码失败！')
       })
