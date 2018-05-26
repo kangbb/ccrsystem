@@ -20,12 +20,12 @@ var SlaveEngine *xorm.Engine
 func init() {
 	var err error
 	// Just for test
-	// MasterEngine, err = xorm.NewEngine("mysql", "root:master@tcp(localhost:3307)/ccrsystem?charset=utf8&parseTime=true")
+	MasterEngine, err = xorm.NewEngine("mysql", "root:master@tcp(localhost:3307)/ccrsystem?charset=utf8&parseTime=true")
 	// True connection for mysql
-	MasterEngine, err = xorm.NewEngine("mysql", "root:master@tcp(dbmaster:3306)/ccrsystem?charset=utf8&parseTime=true")
-	if err != nil {
-		panic(err)
-	}
+	// MasterEngine, err = xorm.NewEngine("mysql", "root:master@tcp(dbmaster:3306)/ccrsystem?charset=utf8&parseTime=true")
+	// if err != nil {
+	// 	panic(err)
+	// }
 
 	err = MasterEngine.Sync2(new(StudentInfo), new(AdminInfo), new(ApproverInfo), new(ClassroomInfo),
 		new(ReservationInfo), new(DepartmentInfo))
@@ -34,12 +34,12 @@ func init() {
 	}
 
 	// Just for test
-	// SlaveEngine, err = xorm.NewEngine("mysql", "root:slave@tcp(localhost:3308)/ccrsystem?charset=utf8&parseTime=true")
+	SlaveEngine, err = xorm.NewEngine("mysql", "root:slave@tcp(localhost:3308)/ccrsystem?charset=utf8&parseTime=true")
 	// True connection for mysql
-	SlaveEngine, err = xorm.NewEngine("mysql", "root:slave@tcp(dbslave:3306)/ccrsystem?charset=utf8&parseTime=true")
-	if err != nil {
-		panic(err)
-	}
+	// SlaveEngine, err = xorm.NewEngine("mysql", "root:slave@tcp(dbslave:3306)/ccrsystem?charset=utf8&parseTime=true")
+	// if err != nil {
+	// 	panic(err)
+	// }
 
 	// Open log function of xorm, and write the logs to file
 	fname := "./data/logs/sqllog/" + time.Now().Format("2006-01-02-15:04:05") + ".log"

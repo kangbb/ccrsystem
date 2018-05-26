@@ -53,13 +53,18 @@ func (*ClassroomInfoService) UpdateInfo(id int, arg ...interface{}) error {
 	switch len(arg) {
 	case 4:
 		classroom.Capacity = arg[3].(int)
+		classroom.ClassroomNum = arg[2].(string)
+		classroom.ClassroomBuilding = arg[1].(string)
+		classroom.ClassroomCampus = arg[0].(string)
 	case 3:
 		classroom.ClassroomNum = arg[2].(string)
+		classroom.ClassroomBuilding = arg[1].(string)
+		classroom.ClassroomCampus = arg[0].(string)
 	case 2:
 		classroom.ClassroomBuilding = arg[1].(string)
+		classroom.ClassroomCampus = arg[0].(string)
 	case 1:
 		classroom.ClassroomCampus = arg[0].(string)
-		break
 	default:
 	}
 	_, err := entities.MasterEngine.Id(id).Update(classroom)

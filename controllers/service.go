@@ -792,7 +792,6 @@ func updateResById(w http.ResponseWriter, r *http.Request) {
 		//if exist, update resinfo
 		state = js.Get("ResState").MustInt()
 		approvalNote = js.Get("ApproverNote").MustString()
-
 		// Get the departmentId
 		approver, err := services.ApproverService.FindInfoById(res.ApproverId)
 		if logs.SqlError(err, w, approver.ApproverName != "") {
@@ -805,7 +804,6 @@ func updateResById(w http.ResponseWriter, r *http.Request) {
 			if logs.SqlError(err, w, department.DepartmentName != "") {
 				return
 			}
-
 			if department.Note == "final" || department.Note == "initial,final" {
 				state = 2
 			} else {
@@ -815,7 +813,6 @@ func updateResById(w http.ResponseWriter, r *http.Request) {
 				if logs.SqlError(err, w, department.DepartmentName != "") {
 					return
 				}
-
 				departmentId = department.DepartmentId
 				approvers, err := services.ApproverService.FindInfoByDepartmentId(departmentId)
 				if logs.SqlError(err, w, len(approvers) != 0) {
@@ -826,7 +823,6 @@ func updateResById(w http.ResponseWriter, r *http.Request) {
 				approvalNote = ""
 			}
 		}
-
 		err = services.ReservationService.UpdateInfo(id, res.ResReason, res.OrganizationName,
 			state, approvalNote, approverId)
 

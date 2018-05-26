@@ -84,13 +84,18 @@ func (*ReservationInfoService) UpdateInfo(id int, arg ...interface{}) error {
 	switch len(arg) {
 	case 5:
 		reservation.ApproverId = arg[4].(int)
+		reservation.ApprovalNote = arg[3].(string)
+		reservation.ResState = arg[2].(int)
+		reservation.OrganizationName = arg[1].(string)
+		reservation.ResReason = arg[0].(string)
 	case 4:
 		reservation.ApprovalNote = arg[3].(string)
 		reservation.ResState = arg[2].(int)
+		reservation.OrganizationName = arg[1].(string)
+		reservation.ResReason = arg[0].(string)
 	case 2:
 		reservation.OrganizationName = arg[1].(string)
 		reservation.ResReason = arg[0].(string)
-		break
 	default:
 	}
 	_, err := entities.MasterEngine.Cols("res_reason", "organization_name", "res_state", "approval_note", "approver_id").Id(id).Update(reservation)
