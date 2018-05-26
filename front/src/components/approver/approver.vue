@@ -8,10 +8,12 @@
         <h3 class="username">审批人 {{userId}}</h3>
       </div>
       <ul class="navigationBar">
-        <li @click="toWaitApprove" :class="{'activeTag':showWaitApprove}">待审批</li>
-        <li @click="toAlreadyApprove" :class="{'activeTag':showAlreadyApprove}">已审批</li>
+<!--         <li @click="toWaitApprove" :class="{'activeTag':showWaitApprove}">待审批</li> -->
+<!--         <li @click="toAlreadyApprove" :class="{'activeTag':showAlreadyApprove}">已审批</li> -->
       </ul>
-
+      <div class="approverPwd">
+         <button @click="reviseApproverPwd">修改密码</button>
+      </div>
       <div class="exit">
          <a href='#' @click='quit'>退出登录</a>
       </div>
@@ -21,19 +23,26 @@
     <div class="content">
       <div class="panel">
         <div class="wait-approve" v-show="showWaitApprove">
-          <h1 v-show="showMsg">没有已审批信息</h1>
           <table v-if="showList1">
             <tr>
               <th>序列</th>
               <th>教室号</th>
               <th>容量</th>
+              <th>申请人</th>
+              <th>开始时间</th>
+              <th>结束时间</th>
+              <!-- <th>申请原因</th> -->
               <th>操作</th>
             </tr>
             <tr v-for="(items,index) in this.waitApproveList" v-bind:key="index">
               <td>{{index+1}}</td>
               <td>{{items.ClassroomNum}}</td>
               <td>{{items.Capacity}}</td>
-              <td><button type="text" id="apply" v-on:click="detail(items.ClassroomNum)">详情</button></td>
+              <td>{{items.StudentId}}</td>
+              <td>{{items.StartTime}}</td>
+              <td>{{items.EndTime}}</td>
+              <!-- <td>{{items.ResReason}}</td> -->
+              <td><button type="text" id="apply" v-on:click="detail(items.ResId)">详情</button></td>
             </tr>
           </table>
 
@@ -42,13 +51,11 @@
             <form>
               <p><span>申请人：</span>{{this.info.StudentId}}</p>
               <p><span>教室号：</span>{{this.info.ClassroomNum}}</p>
-              <p><span>申请日期：</span>{{this.info.year}}<span>年</span>{{this.info.month}}<span>月</span>{{this.info.day}}<span>日</span></p>
-              <p><span>时间：</span>{{this.info.begin}}<span>至</span>{{this.info.end}}</p>
+              <!-- <p><span>申请日期：</span>{{this.info.year}}<span>年</span>{{this.info.month}}<span>月</span>{{this.info.day}}<span>日</span></p>
+              <p><span>时间：</span>{{this.info.begin}}<span>至</span>{{this.info.end}}</p> -->
               <p><span>参与人数：</span>{{this.info.Capacity}}<span>人</span></p>
               <p><span>使用方隶属组织：</span>{{this.info.Organization}}</p>
-              <p><span>申请教室用途：</span>{{this.info.ReservationInfo}}</p>
-              <!-- <input type="button" value="通过审批" v-on:click="passApprove()">
-              <input type="button" value="拒绝审批" v-on:click="failApprove()"> -->
+              <p><span>申请教室用途：</span>{{this.info.ResReason}}</p>
             </form>
             <button v-on:click="passApprove">通过审批</button>
             <button v-on:click="failApprove">拒绝审批</button>
@@ -56,7 +63,7 @@
           </div>
         </div>
 
-        <div class="alrealy-approve" v-show="showAlreadyApprove">
+<!--         <div class="alrealy-approve" v-show="showAlreadyApprove">
           <table v-if="showList2">
             <tr>
               <th>序列</th>
@@ -82,29 +89,43 @@
               <td v-else>审核不通过</td>
             </tr>
           </table>
-        </div>
+        </div> -->
       </div>
+    </div>
+    <h1 v-show="showMsg">没有结果</h1>
+    <div id='applyWindow' v-show='showApproverInfo' class="apply-window">
+    <!-- <button v-on:click='closeWindow'>x</button> -->
+      <form>
+        <p><span>姓名：</span>{{this.username}}</p>
+        <p><span>工号：</span>{{this.userId}}</p>
+        <p>密码：<input type='text' placeholder='输入新密码6位' v-model='password'></p>
+      </form>
+      <button @click="revisePwd">修改密码</button>
+      <button @click="closeStudentInfo">取消</button>
     </div>
 
   </div>
 </template>
 
-<script type="text/ecmascript-6">
+<script>
 import {getCookie, delCookie} from '@/common/js/cookie.js'
 export default {
   name: 'approver',
   data () {
     return {
+      username: '',
+      password: '',
       userId: '',
       waitApproveList: [],
       alreadyApproveList: [],
       showWaitApprove: true,
-      showAlreadyApprove: false,
+      // showAlreadyApprove: false,
       showMsg: false,
       showList1: false,
       showList2: false,
       info: {},
-      showDetail: false
+      showDetail: false,
+      showApproverInfo: false
     }
   },
   created () {
@@ -119,98 +140,54 @@ export default {
   methods: {
     toWaitApprove () {
       this.showWaitApprove = true
-      this.showAlreadyApprove = false
+      // this.showAlreadyApprove = false
       this.showList1 = true
-
       this.waitApproveList = []
-      // var apiStr = 'http://www.kangblog.top/api/users/student/reservations';
-      // this.$http.get(apiStr).then(res=>{
-      //   console.log(res);
-      // })
-      this.$http.get('/api/student/reservation').then(res => {
-        res = res.body.data
-        //  console.log(res);
-        for (var item in res) {
-          var temp = res[item]
-          if (temp.ReservationState == 0) {
-            this.waitApproveList.push(temp)
-          }
-        }
-        console.log('wait to re:' + this.alreadyApproveList)
-        if (this.waitApproveList.length == 0) {
-          this.showMsg = true
-        } else {
-          this.showList2 = true
-        }
-      })
-    },
-    toAlreadyApprove () {
-      this.showWaitApprove = false
-      this.showAlreadyApprove = true
-
-      this.showList2 = true
-      this.alreadyApproveList = []
-
-      // var apiStr ='http://www.kangblog.top/api/users/student/reservations'
-      // this.$http.get(apiStr).then(res=>{
-      //   console.log(res);
-      // })
-      this.$http.get('/api/student/reservation').then(res => {
-        res = res.body.data
-        // console.log(res);
-        for (var item in res) {
-          var temp = res[item]
-          if (temp.ReservationState != 0) {
-            if (temp.ReservationState == 1) {
-              temp.ReservationState = true
-            } else {
-              temp.ReservationState = false
+      this.showMsg = false
+      var apistr = '/api/api/users/approver/reservations'
+      this.$http.get(apistr).then(res => {
+        if (res.status === 200) {
+          console.log(res)
+          console.log(res.body)
+          let reservations = res.body
+          for (var item in reservations) {
+            var temp = reservations[item]
+            if (temp.ResState === 0) {
+              var obj = {}
+              obj.ClassroomId = temp.ClassroomId
+              obj.ClassroomNum = temp.ClassroomNum
+              obj.Capacity = temp.Capacity
+              obj.StudentId = temp.StudentId
+              obj.StartTime = temp.StartTime
+              obj.EndTime = temp.EndTime
+              obj.ResReason = temp.ResReason
+              obj.Organization = temp.OrganizationName
+              obj.ResId = temp.ResId
+              this.waitApproveList.push(obj)
             }
-            this.alreadyApproveList.push(temp)
+          }
+
+          if (this.waitApproveList.length === 0) {
+            this.showMsg = true
           }
         }
-        if (this.alreadyApproveList.length == 0) {
-          this.showMsg = true
-        } else {
-          this.showList1 = true
-        }
+      }).catch(err => {
+        console.log('err')
+        console.log(err)
+        this.showMsg = true
       })
-      console.log('already to re:' + this.alreadyApproveList)
     },
-    dateToStr (date) {
-      var year = date.Year.toString()
-      var month = date.Month
-      month = this.addZero(month)
-      var day = date.Day
-      day = this.addZero(day)
-      var str = year + '-' + month + '-' + day
-      return str
-    },
-    addZero (number) {
-      if (number >= 0 && number <= 9) {
-        number = '0' + number
-      }
-      return number
-    },
-    detail (classroomNum) {
-      this.info.ApproverId = this.userId
-      this.info.ClassroomNum = classroomNum
+    detail (resId) {
+      this.info = {}
       for (var item in this.waitApproveList) {
         var temp = this.waitApproveList[item]
-        if (temp.ClassroomNum == classroomNum) {
+        if (temp.ResId === resId) {
           this.info.StudentId = temp.StudentId
-          this.info.ClassroomId = temp.ClassroomId
+          this.info.ClassroomNum = temp.ClassroomNum
           this.info.Organization = temp.Organization
-          this.info.ReservationInfo = temp.ReservationInfo
+          this.info.ResReason = temp.ResReason
           this.info.Capacity = temp.Capacity
-
-          var date = this.dateToStr(temp.Date)
-          this.info.year = date.substring(0, 4)
-          this.info.month = date.substring(5, 7)
-          this.info.day = date.substring(8, 10)
-
-          this.info.begin = temp.Time[0].toString()
-          this.info.end = temp.Time[1].toString()
+          this.info.ResId = temp.ResId
           break
         }
       }
@@ -220,7 +197,12 @@ export default {
       this.showDetail = false
     },
     passApprove () {
-      this.info.ReservationState = 1
+      let apistr = '/api/api/reservations/' + this.info.ResId
+      this.$http.put(apistr, {ResState: '3', ApprovelNote: '通过'}).then(res => {
+        console.log(res)
+      }).catch(err => {
+        console.log(err)
+      })
       for (var item in this.waitApproveList) {
         var temp = this.waitApproveList[item]
         if (temp.ClassroomNum == this.info.ClassroomNum) {
@@ -228,11 +210,14 @@ export default {
         }
       }
       this.showDetail = false
-
-      // 与后台交互,更新该预订的状态
     },
     failApprove () {
-      this.info.ReservationState = 2
+      let apistr = '/api/api/reservations/' + this.info.ResId
+      this.$http.put(apistr, {ResState: '4', ApprovelNote: '活动不符合要求,不通过'}).then(res => {
+        console.log(res)
+      }).catch(err => {
+        console.log(err)
+      })
       for (var item in this.waitApproveList) {
         var temp = this.waitApproveList[item]
         if (temp.ClassroomNum == this.info.ClassroomNum) {
@@ -240,14 +225,47 @@ export default {
         }
       }
       this.showDetail = false
-      //与后台交互,更新该预订的状态
     },
     quit () {
       delCookie('ApproverId')
-      this.$router.push('/')
+      let apistr = '/api/signout'
+      this.$http.post(apistr).then(res => {
+        if (res.status === 200) {
+          console.log(res)
+          console.log('quit')
+          this.$router.push('/')
+        }
+      }).catch(err => {
+        console.log(err)
+        console.log('退出失败!')
+      })
+    },
+    reviseApproverPwd () {
+      this.showApproverInfo = true
+      var apiStr = '/api/api/users/approver'
+      this.$http.get(apiStr).then(res => {
+        console.log(res)
+        res = res.body
+        this.username = res.ApproverName
+      })
+    },
+    revisePwd () {
+      var apiStr = '/api/api/users/approver'
+      this.$http.put(apiStr, {ApproverPwd: this.password}).then(res => {
+        console.log(res)
+        alert('修改密码成功！')
+        this.quit()
+      }).catch(err => {
+        console.log(err)
+        alert('修改密码失败！')
+      })
+      this.closeStudentInfo()
+    },
+    closeStudentInfo () {
+      this.showApproverInfo = false
     }
   }
-}
+};
 </script>
 
 <style>
@@ -322,6 +340,11 @@ export default {
   li.activeTag {
     background-color: #046E5F;
   }
+  div.nav .approverPwd {
+    position: absolute;
+    right: 8px;
+    bottom: 30px;
+  }
   div.nav .exit{
     position: absolute;
     bottom: 0px;
@@ -329,7 +352,7 @@ export default {
   }
   div.nav  a{
     text-decoration:none;
-    diplay:block;
+    display:block;
     font-size:16px;
     height: 20px;
     line-height:20px;
@@ -338,7 +361,7 @@ export default {
   div.line{
     position: absolute;
     bottom: 0;
-    length:0;
+    left:0;
     width:900px;
     border: 1px solid rgba(187, 187, 187, 1)
   }

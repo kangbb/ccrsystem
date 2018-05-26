@@ -8,8 +8,8 @@ import VueResource from 'vue-resource'
 import jQuery from 'jquery'
 
 Vue.use(VueResource)
-Vue.config.productionTip = false
-Vue.http.options.xhr = {withCredentials: true}
+// Vue.config.productionTip = false
+// Vue.http.options.xhr = {withCredentials: true}
 
 /* eslint-disable no-new */
 new Vue({

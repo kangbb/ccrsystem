@@ -14,6 +14,7 @@
       <div class="error-msg">{{error}}</div>
       <button @click="login('student')" >学生登录</button>
       <button @click="login('approver')">审核员登录</button>
+      <button @click="login('admin')">管理员登录</button>
     <!--  <button @click="login('admin')">管理员登录</button> -->
   </div>
 </template>
@@ -43,59 +44,33 @@ export default {
         //   失败显示错误信息
         // })
 
-        var intId = parseInt(this.id);
-        console.log(typeof intId);
-        console.log(intId);
+        var intId = parseInt(this.id)
+        console.log(typeof intId)
+        console.log(intId)
 
-        var obj = {};
+        var obj = {}
 
         let jid = param.substring(0, 1).toUpperCase() + param.substring(1) + 'Id'
         let jpwd = param.substring(0, 1).toUpperCase() + param.substring(1) + 'Pwd'
 
         obj[jid] = intId;
-        obj[jpwd] = this.password;
+        obj[jpwd] = this.password
 
-        // var apiStr = 'http://www.kangblog.top/' + param + '/signin'
-        var apiStr = param + '/signin'
-        this.$http.post(apiStr, obj).then(res=> {
-          console.log(res);
+        var apiStr = '/api/' + param + '/signin'
+        this.$http.post(apiStr, obj).then(res=>{
+          console.log(res)
+          console.log("status: ",res.status)
+          setCookie(jid, this.id, 1000 * 60)
           this.$router.push('/' + param)
-        }, error=>{
-            this.id = ''
-            this.password = ''
+        }).catch(err=>{
+          this.id = ''
+          this.password = ''
+          if (err.status == 500) {
             this.error = '用户名与密码不匹配!'
-            console.log(this.error);
+          } else if (err.status == 404) {
+            this.error = '此用户不存在！'
+          }
         })
-
-        // mock数据 进行本地测试
-  /*      var apiStr = '/api/' + param
-        this.$http.get(apiStr).then(res => {
-          let matched = false
-          res = res.body.data
-          var temp, tempId, tempPwd
-          for (var item in res) {
-            temp = res[item]
-            let jid = param.substring(0, 1).toUpperCase() + param.substring(1) + 'Id'
-            let jpwd = param.substring(0, 1).toUpperCase() + param.substring(1) + 'Pwd'
-            tempId = temp[jid]
-            tempPwd = temp[jpwd]
-            if (tempId === parseInt(this.id)) {
-              if (tempPwd === this.password) {
-                matched = true
-                break
-              }
-            }
-          }
-          if (matched) {
-            let jid = param.substring(0, 1).toUpperCase() + param.substring(1) + 'Id'
-            setCookie(jid, this.id, 1000 * 60)
-            this.$router.push('/' + param)
-          } else {
-            this.id = ''
-            this.password = ''
-            this.error = '用户名与密码不匹配!'
-          }
-        })*/
       }
     },
     clear () {
