@@ -198,7 +198,7 @@ export default {
     },
     passApprove () {
       let apistr = '/api/reservations/' + this.info.ResId
-      this.$http.put(apistr, {ResState: '3', ApprovelNote: '通过'}).then(res => {
+      this.$http.put(apistr, {ResState: 2, ApprovelNote: '通过'}).then(res => {
         console.log(res)
       }).catch(err => {
         console.log(err)
@@ -213,7 +213,7 @@ export default {
     },
     failApprove () {
       let apistr = '/api/reservations/' + this.info.ResId
-      this.$http.put(apistr, {ResState: '4', ApprovelNote: '活动不符合要求,不通过'}).then(res => {
+      this.$http.put(apistr, {ResState: 3, ApprovelNote: '活动不符合要求,不通过'}).then(res => {
         console.log(res)
       }).catch(err => {
         console.log(err)
