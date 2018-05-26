@@ -15,7 +15,6 @@
       <button @click="login('student')" >学生登录</button>
       <button @click="login('approver')">审核员登录</button>
       <button @click="login('admin')">管理员登录</button>
-    <!--  <button @click="login('admin')">管理员登录</button> -->
   </div>
 </template>
 
@@ -37,17 +36,7 @@ export default {
         this.error = '账号或密码不能为空！'
         this.showError = true
       } else {
-        // 后台post登录数据
-        // this.$http.get(url, {}).then(res => {
-        //   根据res穿回来的值判断是否登陆成功
-        //   成功进入相应页面
-        //   失败显示错误信息
-        // })
-
         var intId = parseInt(this.id)
-        console.log(typeof intId)
-        console.log(intId)
-
         var obj = {}
 
         let jid = param.substring(0, 1).toUpperCase() + param.substring(1) + 'Id'

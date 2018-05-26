@@ -31,7 +31,6 @@
               <th>申请人</th>
               <th>开始时间</th>
               <th>结束时间</th>
-              <!-- <th>申请原因</th> -->
               <th>操作</th>
             </tr>
             <tr v-for="(items,index) in this.waitApproveList" v-bind:key="index">
@@ -41,18 +40,14 @@
               <td>{{items.StudentId}}</td>
               <td>{{items.StartTime}}</td>
               <td>{{items.EndTime}}</td>
-              <!-- <td>{{items.ResReason}}</td> -->
               <td><button type="text" id="apply" v-on:click="detail(items.ResId)">详情</button></td>
             </tr>
           </table>
 
           <div id="detailWindow" v-show="showDetail" class="apply-window">
-            <!-- <button v-on:click="closeWindow">x</button> -->
             <form>
               <p><span>申请人：</span>{{this.info.StudentId}}</p>
               <p><span>教室号：</span>{{this.info.ClassroomNum}}</p>
-              <!-- <p><span>申请日期：</span>{{this.info.year}}<span>年</span>{{this.info.month}}<span>月</span>{{this.info.day}}<span>日</span></p>
-              <p><span>时间：</span>{{this.info.begin}}<span>至</span>{{this.info.end}}</p> -->
               <p><span>参与人数：</span>{{this.info.Capacity}}<span>人</span></p>
               <p><span>使用方隶属组织：</span>{{this.info.Organization}}</p>
               <p><span>申请教室用途：</span>{{this.info.ResReason}}</p>
@@ -62,39 +57,10 @@
             <button v-on:click="closeWindow">关闭</button>
           </div>
         </div>
-
-<!--         <div class="alrealy-approve" v-show="showAlreadyApprove">
-          <table v-if="showList2">
-            <tr>
-              <th>序列</th>
-              <th>申请人</th>
-              <th>教室号</th>
-              <th>日期</th>
-              <th>时间</th>
-              <th>容量</th>
-              <th>使用方隶属组织</th>
-              <th>申请教室用途</th>
-              <th>操作</th>
-            </tr>
-            <tr v-for="(items,index) in this.alreadyApproveList" v-bind:key="index">
-              <td>{{index+1}}</td>
-              <td>{{items.StudentId}}</td>
-              <td>{{items.ClassroomNum}}</td>
-              <td>{{items.Date.Year}}<span>年</span>{{items.Date.Month}}<span>月</span>{{items.Date.Day}}<span>日</span></td>
-              <td><span>第</span>{{items.Time[0]}}<span>节至第</span>{{items.Time[1]}}<span>节</span></td>
-              <td>{{items.Capacity}}<span>人</span></td>
-              <td>{{items.Organization}}</td>
-              <td>{{items.ReservationInfo}}</td>
-              <td v-if="items.ReservationState">审核通过</td>
-              <td v-else>审核不通过</td>
-            </tr>
-          </table>
-        </div> -->
       </div>
     </div>
     <h1 v-show="showMsg">没有结果</h1>
     <div id='applyWindow' v-show='showApproverInfo' class="apply-window">
-    <!-- <button v-on:click='closeWindow'>x</button> -->
       <form>
         <p><span>姓名：</span>{{this.username}}</p>
         <p><span>工号：</span>{{this.userId}}</p>
@@ -119,7 +85,6 @@ export default {
       waitApproveList: [],
       alreadyApproveList: [],
       showWaitApprove: true,
-      // showAlreadyApprove: false,
       showMsg: false,
       showList1: false,
       showList2: false,
@@ -130,7 +95,6 @@ export default {
   },
   created () {
     let uname = getCookie('ApproverId')
-    console.log('uname', uname)
     this.userId = uname
     if (uname === '') {
       this.$router.push('/')
@@ -140,15 +104,12 @@ export default {
   methods: {
     toWaitApprove () {
       this.showWaitApprove = true
-      // this.showAlreadyApprove = false
       this.showList1 = true
       this.waitApproveList = []
       this.showMsg = false
       var apistr = '/api/users/approver/reservations'
       this.$http.get(apistr).then(res => {
         if (res.status === 200) {
-          console.log(res)
-          console.log(res.body)
           let reservations = res.body
           for (var item in reservations) {
             var temp = reservations[item]
@@ -170,7 +131,6 @@ export default {
           }
         }
       }).catch(err => {
-        console.log('err')
         console.log(err)
         this.showMsg = true
       })
@@ -229,7 +189,6 @@ export default {
       let apistr = '/signout'
       this.$http.post(apistr).then(res => {
         if (res.status === 200) {
-          console.log(res)
           console.log('quit')
           this.$router.push('/')
         }

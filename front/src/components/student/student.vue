@@ -70,7 +70,6 @@
           </div>
 
           <div id='applyWindow' v-show='showApply' class="apply-window">
-            <!-- <button v-on:click='closeWindow'>x</button> -->
             <form v-on:submit='applySubmit'>
               <p><span>教室号：</span>{{this.info.ClassroomNum}}</p>
               <p><span>申请日期：</span>{{this.info.year}}<span>年</span>{{this.info.month}}<span>月</span>{{this.info.day}}<span>日</span></p>
@@ -105,7 +104,6 @@
           </table>
         </div>
         <div id='applyWindow' v-show='showRes' class="apply-window">
-            <!-- <button v-on:click='closeWindow'>x</button> -->
             <form>
               <p><span>教室号：</span>{{this.res.ClassroomNum}}</p>
               <p><span>申请日期：</span>{{this.res.year}}<span>年</span>{{this.res.month}}<span>月</span>{{this.res.day}}<span>日</span></p>
@@ -122,7 +120,6 @@
           </div>
 
           <div id='applyWindow' v-show='showRevise' class="apply-window">
-            <!-- <button v-on:click='closeWindow'>x</button> -->
             <form>
               <p><span>教室号：</span>{{this.res.ClassroomNum}}</p>
               <p><span>申请日期：</span>{{this.res.year}}<span>年</span>{{this.res.month}}<span>月</span>{{this.res.day}}<span>日</span></p>
@@ -136,7 +133,6 @@
           </div>
 
           <div id='applyWindow' v-show='showStudentInfo' class="apply-window">
-            <!-- <button v-on:click='closeWindow'>x</button> -->
             <form>
               <p><span>姓名：</span>{{this.username}}</p>
               <p><span>学号：</span>{{this.userId}}</p>
@@ -214,7 +210,6 @@ export default {
        var apiStr = '/api/users/student/reservations';
        this.$http.get(apiStr).then(res=>{
         res = res.body
-        console.log(res)
         var count = 0
         for (var item in res) {
           var temp = res[item]
@@ -234,7 +229,6 @@ export default {
           obj.ResId = temp.ResId
           count = count + 1
           this.reservation.push(obj)
-        //  console.log(obj)
         }
         this.showResList = true
       }).catch(err=>{
@@ -283,7 +277,6 @@ export default {
         var id = parseInt(this.res.ResId)
         var apiStr = '/api/reservations/' + id
         this.$http.delete(apiStr, {body:{id: id}}).then(res=>{
-          console.log(res)
           this.reservation.splice(parseInt(this.res.indexer), 1)
           this.closeRes()
           alert('删除成功')
@@ -308,7 +301,6 @@ export default {
       var id = parseInt(this.res.ResId)
       var apiStr = '/api/reservations/'+ id
       this.$http.put(apiStr, {ResReason: this.res.ResReason, OrganizationName: this.res.OrganizationName, Id: id}).then(res=>{
-          console.log(res)
           alert('修改成功')
       }).catch(err=>{
         alert('修改失败')
@@ -334,7 +326,6 @@ export default {
 
           this.$http.get(apiStr, {params:{ClassroomCampus: '东校园', ClassroomBuilding: '公教楼', StartTime: beginTime, EndTime: endTime, Capacity: cap}}).then(res=>{
             res = res.body
-            console.log("res: ",res)
             this.chooseList = res
             if (this.chooseList.length != 0) {
               this.showList = true
@@ -399,14 +390,11 @@ export default {
       this.info.month = this.parseDateTime(this.date, 'month')
       this.info.day = this.parseDateTime(this.date, 'day')
       this.showApply = true
-    // console.log(this.info)
     },
     applySubmit (e) {
-      // 检查
       if (document.getElementById('organization').value == ' ' || document.getElementById('reservationInfo').value == '') {
         alert('请填写使用方隶属组织和申请教室用途！')
       } else {
-        // 后台交互 增加预订
         var apiStr = '/api/users/student/reservations'
         var obj = {};
         this.info.ResReason = this.reservationInfo
@@ -421,7 +409,6 @@ export default {
           alert('submission succeeds!')
           this.chooseList.splice(this.info.indexer, 1)
           this.closeWindow()
-          console.log(res)
           if (this.chooseList.length == 0) {
             this.showList = false
             this.showError = true
@@ -440,7 +427,6 @@ export default {
       delCookie('StudentId')
       var apiStr = '/signout'
       this.$http.post(apiStr).then(res=>{
-        console.log(res)
         alert('注销成功')
         this.$router.push('/')
       }).catch(err=>{
@@ -451,7 +437,6 @@ export default {
       this.showStudentInfo = true
       var apiStr = '/api/users/student'
       this.$http.get(apiStr).then(res=>{
-        console.log(res)
         res = res.body
         this.username = res.StudentName
       })
@@ -459,7 +444,6 @@ export default {
     revisePwd() {
       var apiStr = '/api/users/student'
       this.$http.put(apiStr, {StudentPwd: this.password}).then(res=>{
-        console.log(res)
         alert('修改密码成功！')
         this.quit()
       }).catch(err=>{
