@@ -296,7 +296,7 @@
         this.displayAllApprover()
       },
       displayAllClass() {
-        var apiStr = '/api/api/classrooms'
+        var apiStr = '/api/classrooms'
         this.$http.get(apiStr).then(res=>{
           res = res.body
       //    console.log(res)
@@ -336,7 +336,7 @@
         if (this.classCapacity != '') {
           if (confirm('确认修改')) {
             var cap = parseInt(this.classCapacity)
-            var apiStr = '/api/api/classrooms/' + this.classId
+            var apiStr = '/api/classrooms/' + this.classId
             this.$http.put(apiStr, {ClassroomCampus: '东校园', ClassroomBuilding: '公教楼', Capacity: cap, ClassroomNum: this.classNum}).then(res=>{
             //  console.log(res)
               alert('revision succeeds!')
@@ -355,7 +355,7 @@
       classDeleteSubmit() {
         if (confirm('确认删除')) {
           var idx = parseInt(this.classId)
-          var apiStr = '/api/api/classrooms/' + idx
+          var apiStr = '/api/classrooms/' + idx
           this.$http.delete(apiStr, {body:{Id: idx}}).then(res=>{
        //     console.log(res)
             this.tempClass.splice(parseInt(this.classIndexer), 1)
@@ -372,7 +372,7 @@
       addClassSubmit() {
         if (this.addClassNum != '' && this.addCapacity != '') {
           if (confirm('确认增加')) {
-            var apiStr = '/api/api/classrooms'
+            var apiStr = '/api/classrooms'
             var obj = {}
             obj.ClassroomCampus = '东校园'
             obj.ClassroomBuilding = '公教楼'
@@ -398,7 +398,7 @@
         this.classroomAdd = false
       },
       displayAllStudent() {
-        var apiStr = '/api/api/users/students'
+        var apiStr = '/api/users/students'
         this.$http.get(apiStr).then(res=>{
           res = res.body
        //   console.log(res)
@@ -438,7 +438,7 @@
         if (this.stuPwd != '') {
           if (confirm('确认修改')) {
             var idx = parseInt(this.stuId)
-            var apiStr = '/api/api/users/students/' + idx
+            var apiStr = '/api/users/students/' + idx
             this.$http.put(apiStr, {StudentPwd: this.stuPwd, Id: idx}).then(res=>{
          //     console.log(res)
               alert('revision succeeds!')
@@ -458,7 +458,7 @@
       stuDeleteSubmit() {
         if (confirm('确认删除')) {
           var idx = parseInt(this.stuId)
-          var apiStr = '/api/api/users/students/' + this.stuId
+          var apiStr = '/api/users/students/' + this.stuId
           this.$http.delete(apiStr, {body:{Id: idx}}).then(res=>{
       //      console.log(res)
             this.tempStu.splice(parseInt(this.stuIndexer), 1)
@@ -475,7 +475,7 @@
       addStuSubmit() {
         if (this.addStuName != '' && this.addStuId != '') {
           if (confirm('确认增加')) {
-            var apiStr = '/api/api/users/students'
+            var apiStr = '/api/users/students'
             var obj = {}
             obj.StudentId = parseInt(this.addStuId)
           //  console.log(obj.StudentId)
@@ -510,7 +510,7 @@
         if (this.appPwd != '') {
           if (confirm('确认修改')) {
             var idx = parseInt(this.appId)
-            var apiStr = '/api/api/users/approvers/' + idx
+            var apiStr = '/api/users/approvers/' + idx
             this.$http.put(apiStr, {ApproverPwd: this.appPwd, Id: idx}).then(res=>{
            //   console.log(res)
               alert('revision succeeds!')
@@ -530,7 +530,7 @@
       appDeleteSubmit() {
         if (confirm('确认删除')) {
           var idx = parseInt(this.appId)
-          var apiStr = '/api/api/users/approvers/' + this.appId
+          var apiStr = '/api/users/approvers/' + this.appId
           console.log(idx)
           this.$http.delete(apiStr, {body:{Id: idx}}).then(res=>{
          //   console.log(res)
@@ -548,7 +548,7 @@
       addAppSubmit() {
         if (this.addAppName != '' && this.addAppId != '' && this.addDepId != '') {
           if (confirm('确认增加')) {
-            var apiStr = '/api/api/users/approvers'
+            var apiStr = '/api/users/approvers'
             var obj = {}
             obj.ApproverId = parseInt(this.addAppId)
           //  console.log(obj.ApproverId)
@@ -575,7 +575,7 @@
         this.approverAdd = false
       },
       displayAllApprover() {
-        var apiStr = '/api/api/users/approvers'
+        var apiStr = '/api/users/approvers'
         this.$http.get(apiStr).then(res=>{
           res = res.body
        //   console.log(res)

@@ -56,7 +56,7 @@ export default {
         obj[jid] = intId;
         obj[jpwd] = this.password
 
-        var apiStr = '/api/' + param + '/signin'
+        var apiStr = '/' + param + '/signin'
         this.$http.post(apiStr, obj).then(res=>{
           console.log(res)
           console.log("status: ",res.status)

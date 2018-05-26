@@ -144,7 +144,7 @@ export default {
       this.showList1 = true
       this.waitApproveList = []
       this.showMsg = false
-      var apistr = '/api/api/users/approver/reservations'
+      var apistr = '/api/users/approver/reservations'
       this.$http.get(apistr).then(res => {
         if (res.status === 200) {
           console.log(res)
@@ -197,7 +197,7 @@ export default {
       this.showDetail = false
     },
     passApprove () {
-      let apistr = '/api/api/reservations/' + this.info.ResId
+      let apistr = '/api/reservations/' + this.info.ResId
       this.$http.put(apistr, {ResState: '3', ApprovelNote: '通过'}).then(res => {
         console.log(res)
       }).catch(err => {
@@ -212,7 +212,7 @@ export default {
       this.showDetail = false
     },
     failApprove () {
-      let apistr = '/api/api/reservations/' + this.info.ResId
+      let apistr = '/api/reservations/' + this.info.ResId
       this.$http.put(apistr, {ResState: '4', ApprovelNote: '活动不符合要求,不通过'}).then(res => {
         console.log(res)
       }).catch(err => {
@@ -242,7 +242,7 @@ export default {
     },
     reviseApproverPwd () {
       this.showApproverInfo = true
-      var apiStr = '/api/api/users/approver'
+      var apiStr = '/api/users/approver'
       this.$http.get(apiStr).then(res => {
         console.log(res)
         res = res.body
@@ -250,7 +250,7 @@ export default {
       })
     },
     revisePwd () {
-      var apiStr = '/api/api/users/approver'
+      var apiStr = '/api/users/approver'
       this.$http.put(apiStr, {ApproverPwd: this.password}).then(res => {
         console.log(res)
         alert('修改密码成功！')

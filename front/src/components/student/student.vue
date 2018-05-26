@@ -211,7 +211,7 @@ export default {
       this.showError = false
 
       this.reservation = []
-       var apiStr = '/api/api/users/student/reservations';
+       var apiStr = '/api/users/student/reservations';
        this.$http.get(apiStr).then(res=>{
         res = res.body
         console.log(res)
@@ -281,7 +281,7 @@ export default {
     deleteApply() {
       if (confirm('确认删除该申请？')) {
         var id = parseInt(this.res.ResId)
-        var apiStr = '/api/api/reservations/' + id
+        var apiStr = '/api/reservations/' + id
         this.$http.delete(apiStr, {body:{id: id}}).then(res=>{
           console.log(res)
           this.reservation.splice(parseInt(this.res.indexer), 1)
@@ -306,7 +306,7 @@ export default {
       this.res.OrganizationName = this.organization
       this.res.ResReason = this.reservationInfo
       var id = parseInt(this.res.ResId)
-      var apiStr = '/api/api/reservations/'+ id
+      var apiStr = '/api/reservations/'+ id
       this.$http.put(apiStr, {ResReason: this.res.ResReason, OrganizationName: this.res.OrganizationName, Id: id}).then(res=>{
           console.log(res)
           alert('修改成功')
@@ -329,7 +329,7 @@ export default {
         } else {
           var beginTime = this.getDateTime(this.date, this.begin)
           var endTime = this.getDateTime(this.date, this.end)
-          var apiStr = '/api/api/classrooms/state'
+          var apiStr = '/api/classrooms/state'
           var cap = parseInt(this.capacity)
 
           this.$http.get(apiStr, {params:{ClassroomCampus: '东校园', ClassroomBuilding: '公教楼', StartTime: beginTime, EndTime: endTime, Capacity: cap}}).then(res=>{
@@ -407,7 +407,7 @@ export default {
         alert('请填写使用方隶属组织和申请教室用途！')
       } else {
         // 后台交互 增加预订
-        var apiStr = '/api/api/users/student/reservations'
+        var apiStr = '/api/users/student/reservations'
         var obj = {};
         this.info.ResReason = this.reservationInfo
         this.info.OrganizationName = this.organization
@@ -449,7 +449,7 @@ export default {
     },
     reviseStudentPwd() {
       this.showStudentInfo = true
-      var apiStr = '/api/api/users/student'
+      var apiStr = '/api/users/student'
       this.$http.get(apiStr).then(res=>{
         console.log(res)
         res = res.body
@@ -457,7 +457,7 @@ export default {
       })
     },
     revisePwd() {
-      var apiStr = '/api/api/users/student'
+      var apiStr = '/api/users/student'
       this.$http.put(apiStr, {StudentPwd: this.password}).then(res=>{
         console.log(res)
         alert('修改密码成功！')
