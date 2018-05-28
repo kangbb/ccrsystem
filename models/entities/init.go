@@ -1,12 +1,12 @@
 package entities
 
 import (
-	"os"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/go-xorm/core"
 	"github.com/go-xorm/xorm"
+	"github.com/natefinch/lumberjack"
 )
 
 /*
@@ -42,12 +42,14 @@ func init() {
 	}
 
 	// Open log function of xorm, and write the logs to file
-	fname := "./data/logs/sqllog/" + time.Now().Format("2006-01-02-15:04:05") + ".log"
-	f, err := os.Create(fname)
-	if err != nil {
-		println(err.Error())
-		return
+	f := &lumberjack.Logger{
+		Filename:   "./data/logs/sqllog/" + time.Now().Format("2006-01-02") + "-sql.log",
+		MaxSize:    500, // megabytes
+		MaxBackups: 3,
+		MaxAge:     28,   //days
+		Compress:   true, // disabled by default
 	}
+
 	MasterEngine.ShowSQL(true)
 	MasterEngine.Logger().SetLevel(core.LOG_DEBUG)
 	MasterEngine.SetLogger(xorm.NewSimpleLogger(f))

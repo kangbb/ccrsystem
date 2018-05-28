@@ -10,11 +10,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"regexp"
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/natefinch/lumberjack"
 )
 
 var Log = &log.Logger{}
@@ -30,13 +31,13 @@ type ErrorMsg struct {
 * It will create a log file to store the error logs.
  */
 func init() {
-	// Define a file to store the logs.
-	// Open log function of xorm, and write the logs to file
-	fname := "./data/logs/ccrsystemlog/" + time.Now().Format("2006-01-02-15:04:05") + ".log"
-	f, err := os.Create(fname)
-	if err != nil {
-		println(err.Error())
-		return
+	// Create a new file to store the log.
+	f := &lumberjack.Logger{
+		Filename:   "./data/logs/ccrsystemlog/" + time.Now().Format("2006-01-02") + "-ccrsystem.log",
+		MaxSize:    500, // megabytes
+		MaxBackups: 3,
+		MaxAge:     28,   //days
+		Compress:   true, // disabled by default
 	}
 
 	// New a logger object.
