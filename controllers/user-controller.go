@@ -139,7 +139,11 @@ func getUserInfo(userType string, w http.ResponseWriter, r *http.Request) {
 * Just for password
  */
 func updateUserInfo(userType string, w http.ResponseWriter, r *http.Request) {
-	var err error
+	var (
+		err error
+		id  int
+		pwd string
+	)
 	//default use the parameter from body
 	defer r.Body.Close()
 	js, err := simplejson.NewFromReader(r.Body)
@@ -147,9 +151,13 @@ func updateUserInfo(userType string, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var id int
 	id, _ = strconv.Atoi(r.Header.Get("userId"))
-	pwd := encryptPwd(id, js.Get(userType+"Pwd").MustString())
+
+	pwd = js.Get(userType + "Pwd").MustString()
+	if !UserPasswordFormatValidate(pwd, w) {
+		return
+	}
+  pwd = encryptPwd(id, pwd)
 	switch userType {
 	case "Student":
 		err = services.StudentService.UpdateInfo(id, pwd)

@@ -31,7 +31,6 @@ func UserIfoFormatValidate(id string, pwd string, w http.ResponseWriter) bool {
 	}
 	match_pwd, err := regexp.MatchString(`^[a-zA-Z0-9][^\s]{5,15}`, pwd)
 	if logs.NormalError(err) {
-		w.WriteHeader(500)
 		return false
 	}
 	if match_id && match_pwd {
@@ -47,6 +46,23 @@ func UserIfoFormatValidate(id string, pwd string, w http.ResponseWriter) bool {
 	data, _ := json.Marshal(UserErrorMsg{id_msg, pwd_msg})
 	w.Write(data)
 	return false
+}
+
+/*
+* Validate the user password format
+* If it doesn't meet the require, return false;
+* Else return true.
+ */
+func UserPasswordFormatValidate(pwd string, w http.ResponseWriter) bool {
+	match_pwd, err := regexp.MatchString(`^[a-zA-Z0-9][^\s]{5,15}`, pwd)
+	if logs.NormalError(err) {
+		return false
+	}
+	if !match_pwd {
+		logs.RequestError(500, logs.ErrorMsg{Msg: "您输入的密码不符合格式"}, w)
+		return false
+	}
+	return true
 }
 
 /*
