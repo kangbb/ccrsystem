@@ -287,7 +287,7 @@ func TestGetClassroomList(t *testing.T) {
 * Test add classroom function.
  */
 func TestAddClassroom(t *testing.T) {
-	reqData := services.ClassroomService.NewClassroom("北校园", "医学院院楼", "D104", 70)
+	reqData := services.ClassroomService.NewClassroom("北校园", "医学院院楼", "D104", 100)
 	reqBody, _ := json.Marshal(*reqData)
 	req := httptest.NewRequest(
 		http.MethodPost,
@@ -434,8 +434,9 @@ func TestGetResById(t *testing.T) {
  */
 func TestUpdateResById(t *testing.T) {
 	reqData := struct {
-		ResReason string
-	}{"考试复习"}
+		ResReason        string
+		OrganizationName string
+	}{"考试复习", "东校园学生会"}
 	reqBody, _ := json.Marshal(reqData)
 	req := httptest.NewRequest(
 		http.MethodGet,
